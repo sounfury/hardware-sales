@@ -1,0 +1,90 @@
+.quote-edit-container {
+    padding-bottom: 40rpx;
+}
+
+.selected-product-card {
+    background: var(--primary-color);
+    color: #fff;
+    padding: 40rpx 40rpx;
+}
+
+.selected-product-card .product-name {
+    font-size: 36rpx;
+    font-weight: bold;
+}
+
+.selected-product-card .spec {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.form-card {
+    background: var(--bg-white);
+    padding: 0 30rpx 30rpx;
+}
+
+.form-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    padding: 30rpx 0 10rpx;
+    border-bottom: 1rpx solid var(--border-color);
+    margin-bottom: 10rpx;
+}
+
+.form-item {
+    display: flex;
+    align-items: center;
+    padding: 24rpx 0;
+    border-bottom: 1rpx solid var(--border-color);
+}
+
+.border-none {
+    border-bottom: none;
+}
+
+.form-item-col {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.label {
+    width: 160rpx;
+    font-size: 28rpx;
+    color: var(--text-main);
+}
+
+.required {
+    color: var(--danger-color);
+    margin-right: 4rpx;
+}
+
+.input {
+    flex: 1;
+    font-size: 28rpx;
+    text-align: right;
+}
+
+.form-item-col .label {
+    margin-bottom: 20rpx;
+}
+
+.textarea {
+    width: 100%;
+    height: 160rpx;
+    font-size: 28rpx;
+    background-color: var(--bg-color);
+    border-radius: 8rpx;
+    padding: 20rpx;
+    box-sizing: border-box;
+}
+
+.bottom-action {
+    padding: 40rpx;
+}
+
+.submit-btn {
+    width: 100%;
+    height: 88rpx;
+    line-height: 88rpx;
+    font-size: 32rpx;
+    border-radius: 8rpx;
+}

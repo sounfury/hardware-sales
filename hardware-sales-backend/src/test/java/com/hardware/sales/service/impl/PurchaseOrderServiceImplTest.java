@@ -58,6 +58,28 @@ class PurchaseOrderServiceImplTest {
     }
 
     /**
+     * 来自“完成补货”流程的采购单会在创建后自动结算，避免后台残留未结算状态。
+     */
+    @Test
+    void shouldAutoSettleWhenCreatingAutoSettledPurchaseOrder() {
+        PurchaseOrder order = new PurchaseOrder();
+        order.setSupplierId(1L);
+        order.setOrderDate(LocalDate.of(2026, 3, 24));
+        order.setAutoSettle(true);
+
+        PurchaseItem item = new PurchaseItem();
+        item.setProductId(1L);
+        item.setQuantity(1);
+        order.setItems(List.of(item));
+
+        purchaseOrderService.createOrder(order);
+
+        PurchaseOrder savedOrder = purchaseOrderService.getById(order.getId());
+
+        assertEquals(1, savedOrder.getPaymentStatus());
+    }
+
+    /**
      * 如果供应商没有维护某商品的供货关系，采购单必须被拒绝。
      */
     @Test

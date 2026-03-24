@@ -1,0 +1,37 @@
+<view class="container quote-container">
+    <view class="search-bar">
+        <input class="search-input" placeholder="输入商品名称搜索" model:value="{{keyword}}" bindconfirm="handleSearch" />
+        <view class="search-icon" bindtap="handleSearch">🔍</view>
+    </view>
+    <view class="list">
+        <block wx:if="{{list.length > 0}}">
+            <view class="quote-card flex-col" wx:for="{{list}}" wx:key="id" bindtap="goToEdit" data-id="{{item.id}}">
+                <view class="product-info flex-row justify-between">
+                    <view class="product-name">{{item.productName}}</view>
+                    <view class="price text-primary">
+                        ¥{{item.supplyPrice}} / {{item.productUnit}}
+                    </view>
+                </view>
+                <view class="spec text-sm mt-sm">规格：{{item.productSpec}}</view>
+                <view class="remark text-sm mt-sm" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+                <view class="actions flex-row mt-md">
+                    <view class="flex-1"></view>
+                    <view class="action-btn delete-btn" catchtap="handleDelete" data-id="{{item.id}}">
+                        删除
+                    </view>
+                    <view class="action-btn edit-btn" catchtap="goToEdit" data-id="{{item.id}}">
+                        编辑
+                    </view>
+                </view>
+            </view>
+            <view class="load-more text-sm">{{hasMore ? '加载中...' : '没有更多了'}}</view>
+        </block>
+        <view class="empty-state flex-col" wx:else>
+            <text class="empty-icon">📦</text>
+            <text class="empty-text">暂无报价数据</text>
+        </view>
+    </view>
+    <view class="fab-btn" bindtap="goToAdd">
+        <text class="fab-icon">+</text>
+    </view>
+</view>

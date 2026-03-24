@@ -1,0 +1,79 @@
+/**app.wxss**/
+page {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --danger-color: #ff4d4f;
+  
+  --text-main: #333333;
+  --text-regular: #666666;
+  --text-secondary: #999999;
+  
+  --bg-color: #f5f7fa;
+  --bg-white: #ffffff;
+  --border-color: #e8e8e8;
+  
+  background-color: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  font-size: 28rpx;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 工具类 */
+.card {
+  background-color: var(--bg-white);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin: 20rpx 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.mt-md { margin-top: 30rpx; }
+.mb-md { margin-bottom: 30rpx; }
+.mt-sm { margin-top: 16rpx; }
+
+.text-lg { font-size: 32rpx; font-weight: bold; }
+.text-md { font-size: 28rpx; }
+.text-sm { font-size: 24rpx; color: var(--text-secondary); }
+
+.text-primary { color: var(--primary-color); }
+.text-danger { color: var(--danger-color); }
+.text-success { color: var(--success-color); }
+.text-warning { color: var(--warning-color); }
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-radius: 8rpx;
+}
+
+button::after {
+  border: none;
+}

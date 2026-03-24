@@ -151,6 +151,15 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         record.setPaymentStatus(0);
         record.setRemark("采购单: " + orderNo);
         financeRecordService.save(record);
+
+        /**
+         * “完成补货”流程下创建的采购单视为货到即付，需要在同一事务里直接结算，
+         * 避免前端再补一次请求时出现“建单成功但结算失败”的中间态。
+         */
+        if (Boolean.TRUE.equals(order.getAutoSettle())) {
+            settle(order.getId());
+            order.setPaymentStatus(1);
+        }
     }
 
     /** 结算采购单，并同步更新关联财务记录状态。 */

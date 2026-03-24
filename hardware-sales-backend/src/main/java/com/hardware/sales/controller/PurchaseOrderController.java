@@ -39,9 +39,9 @@ public class PurchaseOrderController {
 
     /** 创建采购单，自动更新库存和生成财务记录 */
     @PostMapping
-    public Result<?> create(@RequestBody PurchaseOrder order) {
+    public Result<PurchaseOrder> create(@RequestBody PurchaseOrder order) {
         purchaseOrderService.createOrder(order);
-        return Result.ok();
+        return Result.ok(order);
     }
 
     /** 结算采购单，将付款状态标记为已结算 */

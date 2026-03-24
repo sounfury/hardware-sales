@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/quote/quote",
+    "pages/message/message",
+    "pages/profile/profile",
+    "pages/quote-add/quote-add",
+    "pages/quote-edit/quote-edit"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "五金供应商",
+    "navigationBarBackgroundColor": "#1890ff",
+    "backgroundColor": "#f5f7fa"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1890ff",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/quote/quote",
+        "text": "我的报价"
+      },
+      {
+        "pagePath": "pages/message/message",
+        "text": "消息中心"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

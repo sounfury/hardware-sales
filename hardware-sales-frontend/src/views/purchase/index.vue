@@ -1,5 +1,6 @@
 <script setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRoute, useRouter } from 'vue-router'
 import {
   getPurchasePage,
   getPurchaseDetail,
@@ -8,8 +9,17 @@ import {
 } from '@/api/purchase'
 import { getSupplierProductList } from '@/api/supplierProduct'
 import { getSupplierPage } from '@/api/supplier'
+import { sendMessage } from '@/api/message'
 import { getProductPage } from '@/api/product'
 import { formatDate, formatDateTime, formatMoney } from '@/utils/format'
+import {
+  getCurrentLocalDate,
+  getSingleQueryValue,
+  parsePurchasePrefillItems,
+} from '@/utils/purchasePrefill'
+
+const router = useRouter()
+const route = useRoute()
 
 const loading = ref(false)
 const tableData = ref([])
@@ -47,12 +57,14 @@ const searchForm = reactive({
 
 const createDialogVisible = ref(false)
 const createFormRef = ref(null)
+const createMode = ref('manual')
 const createForm = reactive({
   supplierId: null,
   orderDate: '',
   remark: '',
   items: [],
 })
+const isRestockAutoCreate = computed(() => createMode.value === 'restockAuto')
 
 const createRules = {
   supplierId: [{ required: true, message: '请选择供应商', trigger: 'change' }],
@@ -62,6 +74,7 @@ const createRules = {
 const detailDialogVisible = ref(false)
 const detailLoading = ref(false)
 const detailData = ref(null)
+const routePrefillReady = ref(false)
 
 function createEmptyItem() {
   return {
@@ -144,6 +157,7 @@ function resetCreateForm() {
 }
 
 function handleAdd() {
+  createMode.value = 'manual'
   resetCreateForm()
   createDialogVisible.value = true
   nextTick(() => createFormRef.value?.clearValidate())
@@ -197,6 +211,111 @@ function getSupplierProductLabel(item) {
   return `${item.productName}${specLabel}，供货价 ${formatMoney(item.supplyPrice)}${stockLabel}`
 }
 
+/**
+ * 清理当前路由中的采购单预填参数，避免刷新页面后重复自动弹窗。
+ */
+async function clearCreatePrefillQuery() {
+  const nextQuery = { ...route.query }
+  delete nextQuery.openCreate
+  delete nextQuery.supplierId
+  delete nextQuery.orderDate
+  delete nextQuery.items
+
+  const nextQueryKeys = Object.keys(nextQuery)
+  const currentQueryKeys = Object.keys(route.query)
+  if (nextQueryKeys.length === currentQueryKeys.length) {
+    return
+  }
+
+  await router.replace({
+    path: route.path,
+    query: nextQuery,
+  })
+}
+
+/**
+ * 根据路由预填参数自动打开新建采购单弹窗。
+ * 这里同时兼容历史 query 和当前新的 openCreate 标记，保证后续重复跳转也能生效。
+ */
+async function applyCreatePrefillFromRoute(query) {
+  const shouldOpenCreate = getSingleQueryValue(query.openCreate) === '1'
+  const supplierIdText = getSingleQueryValue(query.supplierId)
+  const supplierId = supplierIdText ? Number(supplierIdText) : Number.NaN
+  const orderDate = getSingleQueryValue(query.orderDate) || getCurrentLocalDate()
+
+  if (!shouldOpenCreate && !Number.isFinite(supplierId)) {
+    return
+  }
+
+  createMode.value = 'restockAuto'
+  resetCreateForm()
+  createForm.orderDate = orderDate
+
+  if (Number.isFinite(supplierId)) {
+    createForm.supplierId = supplierId
+    await loadSupplierProducts(supplierId)
+
+    const prefillItems = parsePurchasePrefillItems(query.items)
+    if (prefillItems.length) {
+      createForm.items = prefillItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: supplierProductMap.value[item.productId]?.supplyPrice ?? null,
+      }))
+    }
+  }
+
+  createDialogVisible.value = true
+  nextTick(() => createFormRef.value?.clearValidate())
+  await clearCreatePrefillQuery()
+}
+
+/**
+ * 获取当前采购单选中的供应商资料，便于发送手动建单通知。
+ */
+function getSelectedSupplier() {
+  return supplierOptions.value.find((item) => item.id === createForm.supplierId) || null
+}
+
+/**
+ * 生成手动建单后发给供应商的站内消息内容。
+ * 这里复用当前表单里的采购明细，让供应商能直接看到本次需要供货的商品和数量。
+ */
+function buildManualPurchaseNotice(createdOrder) {
+  const itemSummary = createForm.items
+    .map((item) => {
+      const product = productMap.value[item.productId]
+      const productLabel = product?.name || `商品#${item.productId}`
+      return `${productLabel} x${item.quantity}`
+    })
+    .join('，')
+
+  const remarkSuffix = createForm.remark ? `；备注：${createForm.remark}` : ''
+
+  return {
+    title: `采购单通知 ${createdOrder.orderNo}`,
+    content: `系统已创建采购单 ${createdOrder.orderNo}，采购日期 ${createdOrder.orderDate}，采购明细：${itemSummary}。请及时安排供货${remarkSuffix}。`,
+  }
+}
+
+/**
+ * 手动建单后向供应商发送站内通知，让对方及时按采购单安排供货。
+ */
+async function notifySupplierAfterManualCreate(createdOrder) {
+  const supplier = getSelectedSupplier()
+  if (!supplier?.userId) {
+    return false
+  }
+
+  const notice = buildManualPurchaseNotice(createdOrder)
+  await sendMessage({
+    receiverId: supplier.userId,
+    title: notice.title,
+    content: notice.content,
+  })
+  return true
+}
+
 async function handleCreateSubmit() {
   await createFormRef.value.validate()
   const invalidItem = createForm.items.find(
@@ -206,18 +325,43 @@ async function handleCreateSubmit() {
     ElMessage.warning('请完整填写采购明细')
     return
   }
-  await createPurchaseOrder({
+  const res = await createPurchaseOrder({
     supplierId: createForm.supplierId,
     orderDate: createForm.orderDate,
     remark: createForm.remark,
+    autoSettle: isRestockAutoCreate.value,
     items: createForm.items.map((item) => ({
       productId: item.productId,
       quantity: Number(item.quantity),
     })),
   })
-  ElMessage.success('采购单创建成功')
+
+  const createdOrder = res.data || {}
+  let submitMessage = ''
+  let submitMessageType = 'success'
+
+  if (isRestockAutoCreate.value) {
+    submitMessage = '采购单已自动创建并结算'
+  } else {
+    try {
+      const notified = await notifySupplierAfterManualCreate(createdOrder)
+      submitMessage = notified
+        ? '采购单创建成功，已通知供应商，后续请手动结算'
+        : '采购单创建成功，但未找到供应商消息账号，请手动联系并后续结算'
+      submitMessageType = notified ? 'success' : 'warning'
+    } catch {
+      submitMessage = '采购单创建成功，但供应商通知发送失败，请稍后重试并手动结算'
+      submitMessageType = 'warning'
+    }
+  }
+
   createDialogVisible.value = false
   loadList()
+  if (submitMessageType === 'success') {
+    ElMessage.success(submitMessage)
+  } else {
+    ElMessage.warning(submitMessage)
+  }
 }
 
 async function handleViewDetail(id) {
@@ -241,9 +385,19 @@ async function handleSettle(row) {
   }
 }
 
+watch(
+  () => route.query,
+  async (query) => {
+    if (!routePrefillReady.value) return
+    await applyCreatePrefillFromRoute(query)
+  },
+)
+
 onMounted(async () => {
   await Promise.all([loadSuppliers(), loadProducts()])
   loadList()
+  routePrefillReady.value = true
+  await applyCreatePrefillFromRoute(route.query)
 })
 </script>
 
@@ -356,6 +510,18 @@ onMounted(async () => {
       :close-on-click-modal="false"
     >
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="88px" class="pr-4">
+        <div
+          :class="[
+            'mb-4 rounded-xl border px-4 py-3 text-sm',
+            isRestockAutoCreate
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border-sky-200 bg-sky-50 text-sky-700',
+          ]"
+        >
+          {{ isRestockAutoCreate
+            ? '当前来自“完成补货”流程，提交采购单后会自动结算。'
+            : '当前为手动新建采购单，提交后会通知供应商，后续需手动结算。' }}
+        </div>
         <div class="grid gap-4 md:grid-cols-2">
           <el-form-item label="供应商" prop="supplierId">
             <el-select

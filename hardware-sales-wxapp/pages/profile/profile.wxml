@@ -1,0 +1,47 @@
+<view class="container profile-container">
+    <view class="status-banner {{statusClass}}" wx:if="{{hasProfile}}">
+        <text class="status-icon">{{statusIcon}}</text>
+        <view class="status-content">
+            <view class="status-title">{{statusTitle}}</view>
+            <view class="status-desc" wx:if="{{profile.auditRemark}}">{{profile.auditRemark}}</view>
+        </view>
+    </view>
+    <view class="form-card mt-md">
+        <view class="form-title">基本信息</view>
+        <view class="form-item">
+            <text class="label">
+                <text class="required">*</text>
+                企业名称
+            </text>
+            <input class="input" placeholder="请输入企业名称" value="{{formData.companyName}}" data-field="companyName" bindinput="handleInput" />
+        </view>
+        <view class="form-item">
+            <text class="label">
+                <text class="required">*</text>
+                联系人
+            </text>
+            <input class="input" placeholder="请输入联系人姓名" value="{{formData.contactPerson}}" data-field="contactPerson" bindinput="handleInput" />
+        </view>
+        <view class="form-item">
+            <text class="label">
+                <text class="required">*</text>
+                联系电话
+            </text>
+            <input class="input" type="number" placeholder="请输入联系电话" value="{{formData.contactPhone}}" data-field="contactPhone" bindinput="handleInput" />
+        </view>
+        <view class="form-item">
+            <text class="label">详细地址</text>
+            <input class="input" placeholder="请输入详细地址" value="{{formData.address}}" data-field="address" bindinput="handleInput" />
+        </view>
+        <view class="form-item form-item-col">
+            <text class="label">经营范围</text>
+            <textarea class="textarea" placeholder="请输入主营业务范围" value="{{formData.businessScope}}" data-field="businessScope" bindinput="handleInput"></textarea>
+        </view>
+        <button class="btn-primary submit-btn mt-md" bindtap="handleSubmit" loading="{{submitting}}">
+            {{hasProfile ? '保存修改' : '提交审核'}}
+        </button>
+    </view>
+    <view class="action-card mt-md">
+        <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+    </view>
+</view>

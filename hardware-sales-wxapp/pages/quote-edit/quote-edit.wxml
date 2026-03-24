@@ -1,0 +1,25 @@
+<view class="container quote-edit-container">
+    <view class="selected-product-card flex-col">
+        <view class="product-name">{{quote.productName}}</view>
+        <view class="spec text-sm mt-sm">规格：{{quote.productSpec}} | 单位：{{quote.productUnit}}</view>
+    </view>
+    <view class="form-card mt-md">
+        <view class="form-title">供货信息</view>
+        <view class="form-item">
+            <text class="label">
+                <text class="required">*</text>
+                供货单价
+            </text>
+            <input class="input" type="digit" placeholder="请输入单价(元/{{quote.productUnit}})" value="{{formData.supplyPrice}}" data-field="supplyPrice" bindinput="handleInput" />
+        </view>
+        <view class="form-item form-item-col border-none">
+            <text class="label">备注说明</text>
+            <textarea class="textarea" placeholder="交货周期、质保说明、起订量等" value="{{formData.remark}}" data-field="remark" bindinput="handleInput"></textarea>
+        </view>
+    </view>
+    <view class="bottom-action">
+        <button class="btn-primary submit-btn" bindtap="handleSubmit" loading="{{submitting}}">
+            保存修改
+        </button>
+    </view>
+</view>

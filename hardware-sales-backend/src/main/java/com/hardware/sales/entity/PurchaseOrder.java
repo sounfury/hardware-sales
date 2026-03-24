@@ -26,4 +26,8 @@ public class PurchaseOrder extends BaseEntity {
 
     @TableField(exist = false)
     private String supplierName;
+
+    /** 是否在创建后自动结算，仅作为前后端交互字段使用。 */
+    @TableField(exist = false)
+    private Boolean autoSettle;
 }

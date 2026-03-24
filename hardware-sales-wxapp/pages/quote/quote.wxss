@@ -1,0 +1,117 @@
+.quote-container {
+    padding-bottom: 40rpx;
+}
+
+.search-bar {
+    background: var(--bg-white);
+    padding: 20rpx 40rpx;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    height: 72rpx;
+    background: var(--bg-color);
+    border-radius: 36rpx;
+    padding: 0 80rpx 0 40rpx;
+    font-size: 28rpx;
+}
+
+.search-icon {
+    position: absolute;
+    right: 60rpx;
+    font-size: 32rpx;
+    padding: 10rpx;
+}
+
+.list {
+    padding: 20rpx 30rpx;
+}
+
+.quote-card {
+    background: var(--bg-white);
+    border-radius: 16rpx;
+    padding: 30rpx;
+    margin-bottom: 24rpx;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.product-name {
+    font-size: 32rpx;
+    font-weight: bold;
+}
+
+.price {
+    font-size: 36rpx;
+    font-weight: bold;
+}
+
+.actions {
+    justify-content: flex-end;
+    border-top: 1rpx solid var(--border-color);
+    padding-top: 20rpx;
+}
+
+.action-btn {
+    font-size: 26rpx;
+    padding: 8rpx 30rpx;
+    border-radius: 26rpx;
+    margin-left: 20rpx;
+    border: 1rpx solid var(--border-color);
+}
+
+.delete-btn {
+    color: var(--danger-color);
+    border-color: #ffccc7;
+    background: #fff2f0;
+}
+
+.edit-btn {
+    color: var(--primary-color);
+    border-color: #91caff;
+    background: #e6f7ff;
+}
+
+.load-more {
+    text-align: center;
+    padding: 30rpx 0;
+}
+
+.empty-state {
+    align-items: center;
+    justify-content: center;
+    padding: 120rpx 0;
+}
+
+.empty-icon {
+    font-size: 120rpx;
+    margin-bottom: 20rpx;
+}
+
+.empty-text {
+    color: var(--text-secondary);
+}
+
+.fab-btn {
+    position: fixed;
+    right: 40rpx;
+    bottom: 60rpx;
+    width: 100rpx;
+    height: 100rpx;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.4);
+}
+
+.fab-icon {
+    color: #fff;
+    font-size: 60rpx;
+    margin-top: -8rpx;
+}

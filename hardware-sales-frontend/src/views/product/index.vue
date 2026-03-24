@@ -1,9 +1,13 @@
 <script setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 import { getProductPage, addProduct, updateProduct, deleteProduct, completeRestock } from '@/api/product'
 import { getCategoryList } from '@/api/category'
 import { getSupplierProductByProduct } from '@/api/supplierProduct'
 import { sendRestockMessage } from '@/api/message'
+import { buildPurchasePrefillQuery, getCurrentLocalDate } from '@/utils/purchasePrefill'
+
+const router = useRouter()
 
 /** 分类数据（搜索栏 + 表单下拉共用） */
 const categoryList = ref([])
@@ -223,7 +227,64 @@ async function handleSendRestock(supplierProduct) {
 }
 
 /**
- * 管理员确认供应商已完成补货后，手动结束当前补货状态。
+ * 获取补货完成后用于预填采购单的供应商信息。
+ * 优先使用补货流程里已绑定的供应商，避免同一商品存在多个报价时误取第一家供应商。
+ */
+async function resolveRestockPurchasePrefill(product) {
+  const restockSupplierId = Number(product?.restockSupplierId)
+  if (Number.isFinite(restockSupplierId) && restockSupplierId > 0) {
+    return {
+      supplierId: restockSupplierId,
+      orderDate: getCurrentLocalDate(),
+      items: [{ productId: product.id, quantity: 1 }],
+    }
+  }
+
+  const shouldReuseCurrentQuotes = currentProduct.value?.id === product.id && quoteList.value.length
+  const supplierList = shouldReuseCurrentQuotes
+    ? quoteList.value
+    : ((await getSupplierProductByProduct(product.id)).data || [])
+  const supplier = supplierList.find((item) => item?.supplierId)
+
+  if (!supplier) {
+    return null
+  }
+
+  return {
+    supplierId: supplier.supplierId,
+    orderDate: getCurrentLocalDate(),
+    items: [{ productId: product.id, quantity: 1 }],
+  }
+}
+
+/**
+ * 跳转到采购管理页并自动打开新建采购单弹窗。
+ * 若当前商品找不到可用供应商，则先打开弹窗，提示用户手动补充供应商信息。
+ */
+async function openPurchaseCreateFromRestock(product) {
+  let query = buildPurchasePrefillQuery({
+    orderDate: getCurrentLocalDate(),
+  })
+
+  try {
+    const purchasePrefill = await resolveRestockPurchasePrefill(product)
+    if (purchasePrefill) {
+      query = buildPurchasePrefillQuery(purchasePrefill)
+    } else {
+      ElMessage.warning('未找到该商品对应的供应商报价，请在采购单中手动选择供应商')
+    }
+  } catch {
+    ElMessage.warning('自动带入采购单数据失败，请在采购单中手动补充')
+  }
+
+  await router.push({
+    path: '/trade/purchase',
+    query,
+  })
+}
+
+/**
+ * 管理员确认供应商已完成补货后，手动结束当前补货状态，并跳转到采购管理新建采购单。
  */
 async function handleCompleteRestock(product) {
   await ElMessageBox.confirm(`确认将商品【${product.name}】标记为补货完成？`, '提示', {
@@ -233,6 +294,7 @@ async function handleCompleteRestock(product) {
   ElMessage.success('补货状态已恢复为正常')
   quoteDialogVisible.value = false
   await loadList()
+  await openPurchaseCreateFromRestock(product)
 }
 
 /** 格式化金额 */

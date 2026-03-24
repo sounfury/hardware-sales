@@ -1,0 +1,44 @@
+<view class="container message-container">
+    <view class="header-actions">
+        <view class="unread-badge">未读 {{unreadCount}}</view>
+        <view class="read-all-btn" bindtap="handleReadAll">全部已读</view>
+    </view>
+    <view class="list">
+        <block wx:if="{{list.length > 0}}">
+            <view class="msg-card {{item.isRead ? 'read' : ''}}" wx:for="{{list}}" wx:key="id" bindtap="handleMsgClick" data-item="{{item}}">
+                <view class="msg-header">
+                    <view class="msg-title flex-1">
+                        <text class="dot" wx:if="{{!item.isRead}}"></text>
+                        {{item.title}}
+                    </view>
+                    <view class="msg-time">{{item.createTimeShort}}</view>
+                </view>
+                <view class="msg-content">{{item.content}}</view>
+                <view class="msg-tag {{item.type.toLowerCase()}}" wx:if="{{item.type !== 'GENERAL'}}">
+                    {{item.type === 'RESTOCK_NOTICE' ? '补货提醒' : (item.type === 'RESTOCK_REPLY' ? '回复记录' : '通知')}}
+                </view>
+            </view>
+            <view class="load-more text-sm">{{hasMore ? '加载中...' : '没有更多了'}}</view>
+        </block>
+        <view class="empty-state flex-col" wx:else>
+            <text class="empty-icon">🔔</text>
+            <text class="empty-text">暂无新消息</text>
+        </view>
+    </view>
+    <!-- 补货回复弹窗 -->
+    <view class="modal-mask" wx:if="{{showReplyModal}}">
+        <view class="modal-dialog">
+            <view class="modal-title">回复补货提醒</view>
+            <view class="modal-content">
+                <view class="reply-target">{{currentMsg.title}}</view>
+                <textarea class="reply-input" placeholder="请输入回复内容（例如：今天下午补货）" model:value="{{replyContent}}" fixed="true" cursor-spacing="100"></textarea>
+            </view>
+            <view class="modal-actions">
+                <button class="btn-cancel" bindtap="closeReplyModal">取消</button>
+                <button class="btn-confirm" bindtap="submitReply" loading="{{replying}}">
+                    提交回复
+                </button>
+            </view>
+        </view>
+    </view>
+</view>

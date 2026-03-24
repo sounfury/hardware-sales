@@ -1,0 +1,58 @@
+<view class="container quote-add-container">
+    <!-- 步骤一：选择商品原型 -->
+    <block wx:if="{{step === 1}}">
+        <view class="search-bar">
+            <input class="search-input" placeholder="搜索商品名称" model:value="{{keyword}}" bindconfirm="handleSearch" />
+            <view class="search-icon" bindtap="handleSearch">🔍</view>
+        </view>
+        <view class="list">
+            <view class="step-title">请选择要报价的商品：</view>
+            <block wx:if="{{productList.length > 0}}">
+                <view class="product-card flex-row" wx:for="{{productList}}" wx:key="id" bindtap="selectProduct" data-item="{{item}}">
+                    <view class="flex-1 flex-col">
+                        <view class="product-name">
+                            {{item.name}}
+                            <text class="tag">{{item.brand}}</text>
+                        </view>
+                        <view class="spec text-sm mt-sm">规格：{{item.spec}} | 单位：{{item.unit}}</view>
+                    </view>
+                    <view class="select-btn">选择</view>
+                </view>
+                <view class="load-more text-sm">{{hasMore ? '加载中...' : '没有更多商品了'}}</view>
+            </block>
+            <view class="empty-state flex-col" wx:else>
+                <text class="empty-icon">📂</text>
+                <text class="empty-text">未找到相关商品</text>
+            </view>
+        </view>
+    </block>
+    <!-- 步骤二：填写报价 -->
+    <block wx:if="{{step === 2}}">
+        <view class="selected-product-card flex-col">
+            <view class="product-name">{{selectedProduct.name}}</view>
+            <view class="spec text-sm mt-sm">
+                品牌：{{selectedProduct.brand}} | 规格：{{selectedProduct.spec}}
+            </view>
+            <view class="change-btn" bindtap="goBack">重新选择商品</view>
+        </view>
+        <view class="form-card mt-md">
+            <view class="form-title">供货信息</view>
+            <view class="form-item">
+                <text class="label">
+                    <text class="required">*</text>
+                    供货单价
+                </text>
+                <input class="input" type="digit" placeholder="请输入单价(元/{{selectedProduct.unit}})" value="{{formData.supplyPrice}}" data-field="supplyPrice" bindinput="handleInput" />
+            </view>
+            <view class="form-item form-item-col border-none">
+                <text class="label">备注说明</text>
+                <textarea class="textarea" placeholder="交货周期、质保说明、起订量等" value="{{formData.remark}}" data-field="remark" bindinput="handleInput"></textarea>
+            </view>
+        </view>
+        <view class="bottom-action">
+            <button class="btn-primary submit-btn" bindtap="handleSubmit" loading="{{submitting}}">
+                确认添加
+            </button>
+        </view>
+    </block>
+</view>
