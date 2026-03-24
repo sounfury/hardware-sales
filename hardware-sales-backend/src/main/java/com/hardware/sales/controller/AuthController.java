@@ -22,7 +22,9 @@ public class AuthController {
     private final SysUserService sysUserService;
 
     /**
-     * 账号密码登录，返回 token 和用户信息
+     * 账号密码登录，返回 token 和用户信息。
+     * 当前毕设演示阶段，管理员和供应商共用该登录入口；
+     * 后续若接入真实微信小程序，可再拆分供应商的 openid 登录流程。
      */
     @PostMapping("/login")
     public Result<?> login(@RequestBody Map<String, String> loginForm) {
@@ -38,8 +40,8 @@ public class AuthController {
         if (user.getStatus() != null && user.getStatus() == 0) {
             throw new BizException("账号已被禁用");
         }
-        if (!"ADMIN".equals(user.getRole())) {
-            throw new BizException("当前后台仅允许管理员登录");
+        if (!"ADMIN".equals(user.getRole()) && !"SUPPLIER".equals(user.getRole())) {
+            throw new BizException("当前仅支持管理员或供应商登录");
         }
 
         StpUtil.login(user.getId());
