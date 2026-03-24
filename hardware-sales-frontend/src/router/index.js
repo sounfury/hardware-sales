@@ -25,7 +25,7 @@ const routes = [
   {
     path: '/product',
     component: Layout,
-    meta: { title: '商品管理', icon: 'Goods' },
+    meta: { title: '商品资料', icon: 'Goods' },
     children: [
       {
         path: 'category',
@@ -37,7 +37,7 @@ const routes = [
         path: 'list',
         name: 'Product',
         component: () => import('@/views/product/index.vue'),
-        meta: { title: '商品列表' },
+        meta: { title: '商品原型' },
       },
     ],
   },
@@ -56,7 +56,7 @@ const routes = [
         path: 'product',
         name: 'SupplierProduct',
         component: () => import('@/views/supplier-product/index.vue'),
-        meta: { title: '供应商商品' },
+        meta: { title: '供应商报价' },
       },
       {
         path: 'message',

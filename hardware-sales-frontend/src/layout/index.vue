@@ -17,11 +17,11 @@ const menus = [
     index: '/dashboard',
   },
   {
-    title: '商品管理',
+    title: '商品资料',
     icon: 'Goods',
     children: [
       { title: '商品分类', index: '/product/category' },
-      { title: '商品列表', index: '/product/list' },
+      { title: '商品原型', index: '/product/list' },
     ],
   },
   {
@@ -29,7 +29,7 @@ const menus = [
     icon: 'UserFilled',
     children: [
       { title: '供应商列表', index: '/supplier/list' },
-      { title: '供应商商品', index: '/supplier/product' },
+      { title: '供应商报价', index: '/supplier/product' },
       { title: '站内消息', index: '/supplier/message' },
     ],
   },

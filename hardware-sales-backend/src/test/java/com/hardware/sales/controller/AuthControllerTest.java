@@ -13,7 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * 认证控制器测试，验证后台 Web 登录只允许管理员账号进入。
+ * 认证控制器测试，验证管理员与供应商都可走统一登录入口，
+ * 但业务管理员仍不可使用该演示登录方式。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,18 +25,18 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     /**
-     * 供应商账号不允许通过后台 Web 登录入口进入管理端。
+     * 供应商账号可复用统一登录接口，供小程序演示环境使用。
      */
     @Test
-    void shouldRejectSupplierLoginToWebAdmin() throws Exception {
+    void shouldAllowSupplierLoginForMiniAppDemo() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"supplier_tool_01","password":"admin123"}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(500))
-                .andExpect(jsonPath("$.msg").value("当前后台仅允许管理员登录"));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.user.role").value("SUPPLIER"));
     }
 
     /**
@@ -51,5 +52,20 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.user.role").value("ADMIN"));
+    }
+
+    /**
+     * 业务管理员暂不参与当前演示登录流程。
+     */
+    @Test
+    void shouldRejectBusinessLogin() throws Exception {
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"username":"business01","password":"admin123"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.msg").value("当前仅支持管理员或供应商登录"));
     }
 }

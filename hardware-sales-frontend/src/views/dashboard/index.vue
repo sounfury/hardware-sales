@@ -35,7 +35,7 @@ const restockContent = ref('当前商品库存偏低，请尽快安排补货。'
 const shortcuts = [
   { title: '新建采购单', path: '/trade/purchase', icon: 'ShoppingTrolley', desc: '录入进货' },
   { title: '新建销售单', path: '/trade/sales', icon: 'Sell', desc: '登记出货' },
-  { title: '商品管理', path: '/product/list', icon: 'Goods', desc: '库存维护' },
+  { title: '商品原型', path: '/product/list', icon: 'Goods', desc: '基础资料' },
   { title: '用户管理', path: '/system/user', icon: 'User', desc: '权限管理' },
 ]
 

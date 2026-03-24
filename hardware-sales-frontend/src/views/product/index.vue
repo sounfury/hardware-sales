@@ -272,11 +272,11 @@ onMounted(() => {
     <!-- 页头 -->
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800">商品管理</h2>
-        <p class="text-sm text-gray-400 mt-0.5">管理商品基础信息、补货阈值与当前补货状态</p>
+        <h2 class="text-lg font-semibold text-gray-800">商品原型管理</h2>
+        <p class="text-sm text-gray-400 mt-0.5">维护商品原型、参考进价、售价与补货阈值；供应商报价由微信小程序维护</p>
       </div>
       <el-button type="primary" @click="handleAdd">
-        <el-icon class="mr-1"><Plus /></el-icon>新增商品
+        <el-icon class="mr-1"><Plus /></el-icon>新增商品原型
       </el-button>
     </div>
 
@@ -368,8 +368,6 @@ onMounted(() => {
         <el-table-column label="操作" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <div class="flex items-center justify-center gap-2">
-              <!-- 情境化主操作 -->
-              <!-- 1. 补货中 -> 完成补货 -->
               <el-button
                 v-if="isRestocking(row)"
                 type="success"
@@ -379,7 +377,6 @@ onMounted(() => {
               >
                 <el-icon class="mr-0.5"><Check /></el-icon>完成补货
               </el-button>
-              <!-- 2. 低库存 -> 提醒补货 -->
               <el-button
                 v-else-if="isLowStock(row)"
                 type="warning"
@@ -389,7 +386,6 @@ onMounted(() => {
               >
                 <el-icon class="mr-0.5"><Bell /></el-icon>提醒补货
               </el-button>
-              <!-- 3. 正常状态 -> 编辑商品 -->
               <el-button
                 v-else
                 type="primary"
@@ -402,14 +398,12 @@ onMounted(() => {
 
               <div class="w-px h-3 bg-slate-200"></div>
 
-              <!-- 更多操作：根据主操作动态调整下拉内容 -->
               <el-dropdown trigger="click">
                 <el-button link size="small" type="primary">
                   更多<el-icon class="el-icon--right"><arrow-down /></el-icon>
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <!-- 如果主操作不是编辑，就把编辑放进这里 -->
                     <el-dropdown-item v-if="isLowStock(row) || isRestocking(row)" @click="handleEdit(row)">
                       <el-icon><Edit /></el-icon>编辑信息
                     </el-dropdown-item>

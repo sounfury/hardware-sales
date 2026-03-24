@@ -178,7 +178,7 @@ async function handleSupplierChange() {
   createForm.items = [createEmptyItem()]
   await loadSupplierProducts(createForm.supplierId)
   if (createForm.supplierId && !supplierProductOptions.value.length) {
-    ElMessage.warning('该供应商暂无供货商品，请先到供应商商品页面维护')
+    ElMessage.warning('该供应商暂无供货商品，请先通知供应商在微信小程序维护报价')
   }
 }
 

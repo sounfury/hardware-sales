@@ -154,12 +154,9 @@ onMounted(async () => {
   <div class="space-y-4">
     <div class="flex items-center justify-between gap-4">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800">供应商商品</h2>
-        <p class="mt-0.5 text-sm text-gray-400">管理供应商可供货商品、规格和报价</p>
+        <h2 class="text-lg font-semibold text-gray-800">供应商报价查询</h2>
+        <p class="mt-0.5 text-sm text-gray-400">查看供应商已维护的供货商品与报价；维护动作由供应商微信小程序完成</p>
       </div>
-      <el-button type="primary" @click="handleAdd">
-        <el-icon class="mr-1"><Plus /></el-icon>新增供货商品
-      </el-button>
     </div>
 
     <el-card shadow="never" class="!border-gray-200/80">
@@ -215,21 +212,6 @@ onMounted(async () => {
         <el-table-column prop="remark" label="备注" min-width="200" show-overflow-tooltip />
         <el-table-column label="更新时间" width="180" align="center">
           <template #default="{ row }">{{ formatDateTime(row.updateTime) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="160" align="center" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" text size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-popconfirm
-              title="确定删除该供货商品？"
-              confirm-button-text="确定"
-              cancel-button-text="取消"
-              @confirm="handleDelete(row.id)"
-            >
-              <template #reference>
-                <el-button type="danger" text size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
         </el-table-column>
       </el-table>
 
