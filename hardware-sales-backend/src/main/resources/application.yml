@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/hardware_sales?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: sounfury
+    password: a2133266
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# MyBatis-Plus
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# SA-Token
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+
+# 微信小程序配置
+wx:
+  miniapp:
+    appid: your-appid
+    secret: your-secret
+
+hardware:
+  database:
+    backup:
+      mode: local
+    docker:
+      container: mysql
+      use-sudo: false
