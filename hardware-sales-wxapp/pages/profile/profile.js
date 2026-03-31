@@ -1,65 +1,83 @@
 const { supplierApi, authApi } = require('../../utils/api.js')
 const auth = require('../../utils/auth.js')
 
+/** 构造供应商资料表单的默认值。 */
+function buildFormData(profile, user) {
+    return {
+        companyName: profile?.companyName || '',
+        contactPerson: profile?.contactPerson || user?.nickname || '',
+        contactPhone: profile?.contactPhone || user?.phone || '',
+        address: profile?.address || '',
+        businessScope: profile?.businessScope || ''
+    }
+}
+
 Page({
     data: {
         hasProfile: false,
         profile: null,
-        formData: {
-            companyName: '',
-            contactPerson: '',
-            contactPhone: '',
-            address: '',
-            businessScope: ''
-        },
+        formData: buildFormData(null, null),
         statusClass: '',
         statusIcon: '',
         statusTitle: '',
         submitting: false
     },
 
+    /** 页面展示时刷新当前用户与供应商资料。 */
     onShow() {
         this.loadProfile()
     },
 
+    /** 加载当前登录用户的供应商申请信息。 */
     async loadProfile() {
-        const user = auth.getUser()
-        if (!user) return
+        const user = await this.refreshCurrentUser()
+        if (!user) {
+            return
+        }
 
         try {
-            let supplierInfo = auth.getSupplierInfo()
-            if (supplierInfo && supplierInfo.id) {
-                // try to refresh
-                try {
-                    const res = await supplierApi.getById(supplierInfo.id)
-                    if (res) {
-                        supplierInfo = res
-                        auth.saveSupplierInfo(supplierInfo)
-                    }
-                } catch (e) { }
-            }
-
+            const supplierInfo = await supplierApi.current()
             if (supplierInfo) {
+                auth.saveSupplierInfo(supplierInfo)
                 this.setData({
                     hasProfile: true,
                     profile: supplierInfo,
-                    formData: {
-                        companyName: supplierInfo.companyName || '',
-                        contactPerson: supplierInfo.contactPerson || '',
-                        contactPhone: supplierInfo.contactPhone || '',
-                        address: supplierInfo.address || '',
-                        businessScope: supplierInfo.businessScope || ''
-                    }
+                    formData: buildFormData(supplierInfo, user)
                 })
                 this.updateStatusBanner(supplierInfo.auditStatus)
+                return
             }
+
+            auth.clearSupplierInfo()
+            this.setData({
+                hasProfile: false,
+                profile: null,
+                formData: buildFormData(null, user)
+            })
+            this.updateStatusBanner(null)
         } catch (err) {
             console.error(err)
         }
     },
 
+    /** 刷新当前登录用户信息，保证审核通过后本地角色能及时更新。 */
+    async refreshCurrentUser() {
+        try {
+            const user = await authApi.info()
+            if (user) {
+                auth.updateUser(user)
+            }
+            return user || auth.getUser()
+        } catch (err) {
+            return auth.getUser()
+        }
+    },
+
+    /** 根据审核状态刷新顶部提示条。 */
     updateStatusBanner(status) {
-        let statusClass = '', statusIcon = '', statusTitle = ''
+        let statusClass = ''
+        let statusIcon = ''
+        let statusTitle = ''
         if (status === 0) {
             statusClass = 'pending'
             statusIcon = '⏳'
@@ -76,6 +94,7 @@ Page({
         this.setData({ statusClass, statusIcon, statusTitle })
     },
 
+    /** 同步表单输入内容。 */
     handleInput(e) {
         const field = e.currentTarget.dataset.field
         this.setData({
@@ -83,6 +102,7 @@ Page({
         })
     },
 
+    /** 提交供应商资料申请或修改。 */
     async handleSubmit() {
         const { formData, hasProfile, profile } = this.data
         if (!formData.companyName || !formData.contactPerson || !formData.contactPhone) {
@@ -92,37 +112,26 @@ Page({
 
         this.setData({ submitting: true })
         try {
-            let res
             if (hasProfile && profile && profile.id) {
-                res = await supplierApi.update({
+                await supplierApi.update({
                     ...formData,
                     id: profile.id
                 })
                 wx.showToast({ title: '修改成功', icon: 'success' })
             } else {
-                res = await supplierApi.create(formData)
+                await supplierApi.create(formData)
                 wx.showToast({ title: '提交成功', icon: 'success' })
             }
 
-            const newInfo = Object.assign({}, profile || {}, formData)
-            if (res && res.id) newInfo.id = res.id
-            else if (res && typeof res === 'number') newInfo.id = res // incase backend returns id directly
-            newInfo.auditStatus = newInfo.auditStatus ?? 0
-
-            auth.saveSupplierInfo(newInfo)
-
-            this.setData({
-                submitting: false,
-                hasProfile: true,
-                profile: newInfo
-            })
-            this.updateStatusBanner(newInfo.auditStatus)
-
+            await this.loadProfile()
         } catch (err) {
+            // 错误提示已在请求层处理
+        } finally {
             this.setData({ submitting: false })
         }
     },
 
+    /** 退出当前登录账号。 */
     handleLogout() {
         wx.showModal({
             title: '提示',

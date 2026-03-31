@@ -33,6 +33,29 @@
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.05);
 }
 
+.mode-switch {
+    display: flex;
+    background: #f0f5ff;
+    border-radius: 999rpx;
+    padding: 8rpx;
+    margin-bottom: 40rpx;
+}
+
+.mode-item {
+    flex: 1;
+    text-align: center;
+    line-height: 72rpx;
+    border-radius: 999rpx;
+    color: var(--text-secondary);
+    font-size: 28rpx;
+}
+
+.mode-item.active {
+    background: #1890ff;
+    color: #fff;
+    font-weight: 600;
+}
+
 .input-group {
     display: flex;
     flex-direction: column;
@@ -59,4 +82,24 @@
     line-height: 88rpx;
     font-size: 32rpx;
     width: 100%;
+}
+
+.register-tip {
+    margin-top: 24rpx;
+    font-size: 24rpx;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.switch-tip {
+    margin-top: 28rpx;
+    text-align: center;
+    font-size: 26rpx;
+    color: var(--text-secondary);
+}
+
+.switch-link {
+    margin-left: 10rpx;
+    color: #1890ff;
+    font-weight: 600;
 }

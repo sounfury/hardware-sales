@@ -23,9 +23,7 @@ async function handleLogin() {
     ElMessage.success('登录成功')
     router.push('/')
   } catch (error) {
-    if (error?.message === '当前后台仅允许管理员登录') {
-      ElMessage.error(error.message)
-    }
+    // 请求层已统一处理错误提示，这里只负责结束提交流程。
   } finally {
     loading.value = false
   }

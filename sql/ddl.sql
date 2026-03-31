@@ -12,7 +12,7 @@ CREATE TABLE sys_user (
     nickname    VARCHAR(50)     COMMENT '昵称',
     avatar      VARCHAR(255)    COMMENT '头像',
     phone       VARCHAR(20)     COMMENT '手机号',
-    role        VARCHAR(20)     NOT NULL COMMENT '角色：ADMIN-系统管理员 BUSINESS-业务管理员 SUPPLIER-供应商',
+    role        VARCHAR(20)     NOT NULL COMMENT '角色：ADMIN-系统管理员 BUSINESS-业务管理员 SUPPLIER-供应商 空字符串-待申请用户',
     status      TINYINT         NOT NULL DEFAULT 1 COMMENT '0-禁用 1-正常',
     create_time DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

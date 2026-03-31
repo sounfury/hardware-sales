@@ -6,16 +6,23 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hardware.sales.common.exception.BizException;
 import com.hardware.sales.entity.Supplier;
+import com.hardware.sales.entity.SysUser;
 import com.hardware.sales.mapper.SupplierMapper;
 import com.hardware.sales.service.SupplierService;
+import com.hardware.sales.service.SysUserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 供应商管理服务实现
  */
 @Service
+@RequiredArgsConstructor
 public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier>
         implements SupplierService {
+
+    private final SysUserService sysUserService;
 
     @Override
     public IPage<Supplier> pageQuery(Integer pageNum, Integer pageSize,
@@ -28,6 +35,7 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void audit(Long id, Integer auditStatus, String auditRemark) {
         Supplier supplier = getById(id);
         if (supplier == null) {
@@ -39,5 +47,18 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier>
         supplier.setAuditStatus(auditStatus);
         supplier.setAuditRemark(auditRemark);
         updateById(supplier);
+        syncSupplierUserRole(supplier.getUserId(), auditStatus);
+    }
+
+    /**
+     * 根据审核结果同步供应商账号角色。
+     */
+    private void syncSupplierUserRole(Long userId, Integer auditStatus) {
+        SysUser user = sysUserService.getById(userId);
+        if (user == null) {
+            throw new BizException("供应商关联用户不存在");
+        }
+        user.setRole(auditStatus != null && auditStatus == 1 ? "SUPPLIER" : "");
+        sysUserService.updateById(user);
     }
 }

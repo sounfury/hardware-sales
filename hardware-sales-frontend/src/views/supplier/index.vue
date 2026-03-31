@@ -73,6 +73,11 @@ function getAuditMeta(status) {
   }
 }
 
+/** 判断当前供应商是否还需要显示审核入口。 */
+function canAuditSupplier(status) {
+  return status !== 1
+}
+
 async function loadSupplierUsers() {
   const res = await getUserPage({
     pageNum: 1,
@@ -162,6 +167,9 @@ async function handleDelete(id) {
 }
 
 function handleOpenAudit(row) {
+  if (!canAuditSupplier(row.auditStatus)) {
+    return
+  }
   auditForm.id = row.id
   auditForm.auditStatus = row.auditStatus === 2 ? 2 : 1
   auditForm.auditRemark = row.auditRemark || ''
@@ -255,7 +263,15 @@ onMounted(async () => {
         </el-table-column>
         <el-table-column label="操作" width="210" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="success" text size="small" @click="handleOpenAudit(row)">审核</el-button>
+            <el-button
+              v-if="canAuditSupplier(row.auditStatus)"
+              type="success"
+              text
+              size="small"
+              @click="handleOpenAudit(row)"
+            >
+              审核
+            </el-button>
             <el-button type="primary" text size="small" @click="handleEdit(row)">编辑</el-button>
             <el-popconfirm
               title="确定删除该供应商？"

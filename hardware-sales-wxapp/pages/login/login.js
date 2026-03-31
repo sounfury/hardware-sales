@@ -3,18 +3,52 @@ const auth = require('../../utils/auth.js')
 
 Page({
     data: {
+        mode: 'login',
         username: '',
         password: '',
+        confirmPassword: '',
+        nickname: '',
+        phone: '',
         loading: false
     },
 
+    /** 页面加载时，如果已有登录态则直接进入默认页。 */
     onLoad() {
-        // 若已登录，直接跳走
-        if (auth.getToken() && auth.isSupplier()) {
-            wx.switchTab({ url: '/pages/quote/quote' })
+        if (auth.getToken()) {
+            wx.switchTab({ url: auth.getDefaultHomePage() })
         }
     },
 
+    /** 切换登录/注册模式。 */
+    switchMode(e) {
+        const mode = e.currentTarget.dataset.mode
+        if (!mode || mode === this.data.mode) {
+            return
+        }
+        this.setData({
+            mode,
+            loading: false
+        })
+    },
+
+    /** 同步输入框内容。 */
+    handleInput(e) {
+        const field = e.currentTarget.dataset.field
+        this.setData({
+            [field]: e.detail.value
+        })
+    },
+
+    /** 统一处理表单提交。 */
+    async handleSubmit() {
+        if (this.data.mode === 'register') {
+            await this.handleRegister()
+            return
+        }
+        await this.handleLogin()
+    },
+
+    /** 执行登录。 */
     async handleLogin() {
         const { username, password } = this.data
         if (!username || !password) {
@@ -25,24 +59,46 @@ Page({
         this.setData({ loading: true })
         try {
             const res = await authApi.login({ username, password })
-
-            // 校验角色
-            if (res.user.role !== 'SUPPLIER') {
-                wx.showToast({ title: '当前账号不可进入供应商端', icon: 'none' })
-                this.setData({ loading: false })
-                return
-            }
-
-            // 保存登录态
             auth.saveLoginInfo(res)
-
             wx.showToast({ title: '登录成功', icon: 'success' })
-
             setTimeout(() => {
-                wx.switchTab({ url: '/pages/quote/quote' })
+                wx.switchTab({ url: auth.getDefaultHomePage() })
             }, 1000)
-
         } catch (err) {
+            // 错误提示已在请求层处理
+        } finally {
+            this.setData({ loading: false })
+        }
+    },
+
+    /** 执行注册。 */
+    async handleRegister() {
+        const { username, password, confirmPassword, nickname, phone } = this.data
+        if (!username || !password) {
+            wx.showToast({ title: '请输入用户名和密码', icon: 'none' })
+            return
+        }
+        if (password !== confirmPassword) {
+            wx.showToast({ title: '两次输入的密码不一致', icon: 'none' })
+            return
+        }
+
+        this.setData({ loading: true })
+        try {
+            const res = await authApi.register({
+                username,
+                password,
+                nickname,
+                phone
+            })
+            auth.saveLoginInfo(res)
+            wx.showToast({ title: '注册成功', icon: 'success' })
+            setTimeout(() => {
+                wx.switchTab({ url: '/pages/profile/profile' })
+            }, 1000)
+        } catch (err) {
+            // 错误提示已在请求层处理
+        } finally {
             this.setData({ loading: false })
         }
     }

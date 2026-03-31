@@ -35,6 +35,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
             throw new BizException("用户名已存在");
         }
         user.setPassword(BCrypt.hashpw(user.getPassword()));
+        if (user.getRole() == null) {
+            user.setRole("");
+        }
         if (user.getStatus() == null) {
             user.setStatus(1);
         }

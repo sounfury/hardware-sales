@@ -19,7 +19,7 @@ INSERT INTO sys_user (id, username, password, nickname, phone, role, status, cre
     (103, 'supplier_pipe_01', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '陈波', '13910000003', 'SUPPLIER', 1, '2026-03-01 09:40:00', '2026-03-01 09:40:00'),
     (104, 'supplier_wire_01', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '吴倩', '13910000004', 'SUPPLIER', 1, '2026-03-01 09:45:00', '2026-03-01 09:45:00'),
     (105, 'supplier_mix_01', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '赵峰', '13910000005', 'SUPPLIER', 1, '2026-03-01 09:50:00', '2026-03-01 09:50:00'),
-    (106, 'supplier_pending_01', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '待审核用户', '13910000006', 'SUPPLIER', 1, '2026-03-01 09:55:00', '2026-03-01 09:55:00');
+    (106, 'supplier_pending_01', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '待审核用户', '13910000006', '', 1, '2026-03-01 09:55:00', '2026-03-01 09:55:00');
 
 -- ----------------------------
 -- 商品分类

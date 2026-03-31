@@ -34,6 +34,12 @@ public class SupplierController {
         return Result.ok(supplierService.pageQuery(pageNum, pageSize, companyName, auditStatus));
     }
 
+    /** 查询当前登录用户绑定的供应商申请信息。 */
+    @GetMapping("/current")
+    public Result<Supplier> current() {
+        return Result.ok(findCurrentSupplier());
+    }
+
     /** 根据 ID 查询供应商详情 */
     @GetMapping("/{id}")
     @SaCheckRole(value = {"ADMIN", "SUPPLIER"}, mode = SaMode.OR)
@@ -47,9 +53,8 @@ public class SupplierController {
 
     /** 新增供应商 */
     @PostMapping
-    @SaCheckRole(value = {"ADMIN", "SUPPLIER"}, mode = SaMode.OR)
     public Result<?> save(@RequestBody Supplier supplier) {
-        if (StpUtil.hasRole("SUPPLIER")) {
+        if (!isAdmin()) {
             if (findCurrentSupplier() != null) {
                 throw new BizException("当前供应商档案已存在，请直接修改");
             }
@@ -63,14 +68,19 @@ public class SupplierController {
 
     /** 修改供应商信息 */
     @PutMapping
-    @SaCheckRole(value = {"ADMIN", "SUPPLIER"}, mode = SaMode.OR)
     public Result<?> update(@RequestBody Supplier supplier) {
-        if (StpUtil.hasRole("SUPPLIER")) {
+        if (!isAdmin()) {
             Supplier existing = requireCurrentSupplier();
             supplier.setId(existing.getId());
             supplier.setUserId(existing.getUserId());
-            supplier.setAuditStatus(existing.getAuditStatus());
-            supplier.setAuditRemark(existing.getAuditRemark());
+            if (existing.getAuditStatus() != null && existing.getAuditStatus() == 1) {
+                supplier.setAuditStatus(existing.getAuditStatus());
+                supplier.setAuditRemark(existing.getAuditRemark());
+            } else {
+                // 非已通过状态下重新提交资料时，自动回到待审核，避免用户修改后仍停留在驳回状态。
+                supplier.setAuditStatus(0);
+                supplier.setAuditRemark(null);
+            }
         }
         supplierService.updateById(supplier);
         return Result.ok();
@@ -102,12 +112,14 @@ public class SupplierController {
         return supplier;
     }
 
+    /** 查询当前登录用户的供应商记录，不存在时返回 null。 */
     private Supplier findCurrentSupplier() {
         return supplierService.lambdaQuery()
                 .eq(Supplier::getUserId, StpUtil.getLoginIdAsLong())
                 .one();
     }
 
+    /** 获取当前登录用户的供应商记录，不存在时抛出异常。 */
     private Supplier requireCurrentSupplier() {
         Supplier supplier = findCurrentSupplier();
         if (supplier == null) {
@@ -116,10 +128,16 @@ public class SupplierController {
         return supplier;
     }
 
+    /** 校验供应商只能访问自己的档案。 */
     private void validateSupplierOwner(Long supplierId) {
         Supplier currentSupplier = requireCurrentSupplier();
         if (!Objects.equals(supplierId, currentSupplier.getId())) {
             throw new BizException("仅支持查看当前供应商自己的档案");
         }
+    }
+
+    /** 判断当前登录用户是否为后台管理员。 */
+    private boolean isAdmin() {
+        return StpUtil.hasRole("ADMIN");
     }
 }
