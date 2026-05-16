@@ -23,26 +23,30 @@ function getUser() {
     return info ? info.user : null
 }
 
-/** 判断当前用户是否为审核通过后的供应商角色。 */
+/** 判断当前用户是否为供应商角色。 */
 function isSupplier() {
     const user = getUser()
     return user && user.role === 'SUPPLIER'
 }
 
+/** 判断当前用户是否为客户角色。 */
+function isCustomer() {
+    const user = getUser()
+    return user && user.role === 'CUSTOMER'
+}
+
 /** 更新本地缓存中的用户信息。 */
 function updateUser(user) {
     const info = getLoginInfo()
-    if (!info) {
-        return
-    }
-    saveLoginInfo({
-        ...info,
-        user
-    })
+    if (!info) return
+    saveLoginInfo({ ...info, user })
 }
 
-/** 获取登录成功后的默认落地页。 */
+/** 获取登录成功后的默认落地页，按角色分流。 */
 function getDefaultHomePage() {
+    if (isCustomer()) {
+        return '/pages/product-list/product-list'
+    }
     return isSupplier() ? '/pages/quote/quote' : '/pages/profile/profile'
 }
 
@@ -77,6 +81,7 @@ module.exports = {
     getToken,
     getUser,
     isSupplier,
+    isCustomer,
     updateUser,
     getDefaultHomePage,
     clearLoginInfo,

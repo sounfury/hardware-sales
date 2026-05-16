@@ -1,0 +1,32 @@
+<view class="container orders-container">
+    <view class="order-list">
+        <view class="order-card" wx:for="{{orders}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+            <view class="order-header flex-row justify-between">
+                <view class="order-no">单号：{{item.orderNo}}</view>
+                <view class="status-badge {{item.statusClass}}">{{item.statusText}}</view>
+            </view>
+            <view class="divider"></view>
+            <view class="order-body flex-row justify-between">
+                <view>
+                    <view class="order-amount-label">预定金额</view>
+                    <view class="order-amount">¥{{item.totalAmount}}</view>
+                </view>
+                <view class="order-date-wrap">
+                    <view class="order-date-label">预定日期</view>
+                    <view class="order-date">{{item.orderDate}}</view>
+                </view>
+            </view>
+            <view class="order-remark text-sm" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+            <view class="order-footer flex-row">
+                <text class="view-detail">查看明细 ›</text>
+            </view>
+        </view>
+        <view class="empty-state" wx:if="{{!loading && orders.length === 0}}">
+            <text class="empty-icon">📋</text>
+            <text class="empty-title">暂无预定记录</text>
+            <text class="empty-sub">去商品列表下单吧～</text>
+        </view>
+        <view class="load-more" wx:if="{{loading}}">加载中...</view>
+        <view class="load-more" wx:if="{{!loading && finished && orders.length > 0}}">— 全部 {{total}} 条 —</view>
+    </view>
+</view>

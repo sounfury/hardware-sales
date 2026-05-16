@@ -15,7 +15,7 @@ public class SysUser extends BaseEntity {
     private String nickname;
     private String avatar;
     private String phone;
-    /** ADMIN-系统管理员 BUSINESS-业务管理员 SUPPLIER-供应商 */
+    /** ADMIN-业务管理员 SUPPLIER-供应商 CUSTOMER-客户 */
     private String role;
     /** 0-禁用 1-正常 */
     private Integer status;

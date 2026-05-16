@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', {
       const res = await loginApi({ username, password })
       if (res.data.user?.role !== 'ADMIN') {
         clearAuthState(this)
-        throw new Error('当前后台仅允许管理员登录')
+        throw new Error('当前后台仅允许业务管理员登录')
       }
       this.token = res.data.token
       localStorage.setItem('token', res.data.token)
@@ -35,7 +35,7 @@ export const useUserStore = defineStore('user', {
       const res = await getUserInfo()
       if (res.data?.role !== 'ADMIN') {
         clearAuthState(this)
-        throw new Error('当前后台仅允许管理员登录')
+        throw new Error('当前后台仅允许业务管理员登录')
       }
       this.userInfo = res.data
       return res.data

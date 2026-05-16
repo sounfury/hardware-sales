@@ -1,0 +1,27 @@
+<!-- 客户端 tabBar -->
+<view class="tab-bar" wx:if="{{isCustomer}}">
+    <view
+        wx:for="{{customerTabs}}"
+        wx:key="pagePath"
+        class="tab-item {{selected === index ? 'active' : ''}}"
+        data-url="{{item.pagePath}}"
+        bindtap="switchTab"
+    >
+        <text class="tab-icon">{{item.icon}}</text>
+        <text class="tab-text">{{item.text}}</text>
+    </view>
+</view>
+
+<!-- 供应商端 tabBar -->
+<view class="tab-bar" wx:else>
+    <view
+        wx:for="{{supplierTabs}}"
+        wx:key="pagePath"
+        class="tab-item {{selected === index ? 'active' : ''}}"
+        data-url="{{item.pagePath}}"
+        bindtap="switchTab"
+    >
+        <text class="tab-icon">{{item.icon}}</text>
+        <text class="tab-text">{{item.text}}</text>
+    </view>
+</view>

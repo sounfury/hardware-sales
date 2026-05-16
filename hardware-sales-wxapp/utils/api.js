@@ -64,10 +64,21 @@ const messageApi = {
     restockReply: (data) => request({ url: '/api/message/restock-reply', method: 'POST', data })
 }
 
+// 6. 小程序客户预定模块
+const salesMiniappApi = {
+    /** 客户提交预定。 */
+    preorder: (data) => request({ url: '/api/sales/miniapp/preorder', method: 'POST', data }),
+    /** 查询当前客户的预定分页。 */
+    myPage: (params) => request({ url: '/api/sales/miniapp/my-page', method: 'GET', data: params }),
+    /** 查询当前客户的预定详情。 */
+    getById: (id) => request({ url: `/api/sales/miniapp/${id}`, method: 'GET' })
+}
+
 module.exports = {
     authApi,
     supplierApi,
     productApi,
     supplierProductApi,
-    messageApi
+    messageApi,
+    salesMiniappApi
 }

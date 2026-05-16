@@ -73,7 +73,7 @@ async function handleLogin() {
       <div class="flex-1 flex flex-col justify-center px-12 md:px-20">
         <div class="mb-10">
           <h2 class="text-2xl font-bold text-slate-800 mb-2">欢迎回来</h2>
-          <p class="text-slate-400">请使用您的管理员账号登录</p>
+          <p class="text-slate-400">请使用您的业务管理员账号登录</p>
         </div>
 
         <el-form :model="form" @keyup.enter="handleLogin" label-position="top">

@@ -6,7 +6,7 @@
 
 .header {
     align-items: center;
-    margin-bottom: 80rpx;
+    margin-bottom: 60rpx;
 }
 
 .logo-text {
@@ -22,8 +22,11 @@
 }
 
 .subtitle {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: var(--text-secondary);
+    text-align: center;
+    padding: 0 10rpx;
+    line-height: 1.5;
 }
 
 .form-card {
@@ -33,12 +36,13 @@
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.05);
 }
 
+/* 登录/注册 模式切换 */
 .mode-switch {
     display: flex;
     background: #f0f5ff;
     border-radius: 999rpx;
     padding: 8rpx;
-    margin-bottom: 40rpx;
+    margin-bottom: 36rpx;
 }
 
 .mode-item {
@@ -56,6 +60,32 @@
     font-weight: 600;
 }
 
+/* 注册类型切换：客户 / 供应商 */
+.register-type-switch {
+    display: flex;
+    gap: 16rpx;
+    margin-bottom: 36rpx;
+}
+
+.type-btn {
+    flex: 1;
+    text-align: center;
+    line-height: 72rpx;
+    border-radius: 12rpx;
+    font-size: 26rpx;
+    color: var(--text-secondary);
+    border: 2rpx solid var(--border-color);
+    background: var(--bg-color);
+}
+
+.type-btn.type-active {
+    border-color: #1890ff;
+    color: #1890ff;
+    background: #e6f7ff;
+    font-weight: 600;
+}
+
+/* 输入项 */
 .input-group {
     display: flex;
     flex-direction: column;
@@ -85,10 +115,14 @@
 }
 
 .register-tip {
-    margin-top: 24rpx;
+    margin-top: 20rpx;
     font-size: 24rpx;
     line-height: 1.6;
     color: var(--text-secondary);
+}
+
+.customer-tip {
+    color: #52c41a;
 }
 
 .switch-tip {

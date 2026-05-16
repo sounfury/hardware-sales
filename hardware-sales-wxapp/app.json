@@ -1,6 +1,11 @@
 {
   "pages": [
     "pages/login/login",
+    "pages/product-list/product-list",
+    "pages/my-orders/my-orders",
+    "pages/customer-profile/customer-profile",
+    "pages/product-detail/product-detail",
+    "pages/order-detail/order-detail",
     "pages/quote/quote",
     "pages/message/message",
     "pages/profile/profile",
@@ -9,27 +14,22 @@
   ],
   "window": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "五金供应商",
+    "navigationBarTitleText": "五金销售",
     "navigationBarBackgroundColor": "#1890ff",
     "backgroundColor": "#f5f7fa"
   },
   "tabBar": {
+    "custom": true,
     "color": "#999999",
     "selectedColor": "#1890ff",
     "backgroundColor": "#ffffff",
     "list": [
-      {
-        "pagePath": "pages/quote/quote",
-        "text": "我的报价"
-      },
-      {
-        "pagePath": "pages/message/message",
-        "text": "消息中心"
-      },
-      {
-        "pagePath": "pages/profile/profile",
-        "text": "我的"
-      }
+      { "pagePath": "pages/product-list/product-list", "text": "商品" },
+      { "pagePath": "pages/my-orders/my-orders", "text": "我的预定" },
+      { "pagePath": "pages/customer-profile/customer-profile", "text": "我的" },
+      { "pagePath": "pages/quote/quote", "text": "我的报价" },
+      { "pagePath": "pages/message/message", "text": "消息中心" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
   "style": "v2",

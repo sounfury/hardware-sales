@@ -22,7 +22,7 @@ public class ProductController {
 
     /** 分页查询商品，支持按名称、品牌、分类筛选 */
     @GetMapping("/page")
-    @SaCheckRole(value = {"ADMIN", "SUPPLIER"}, mode = SaMode.OR)
+    @SaCheckRole(value = {"ADMIN", "SUPPLIER", "CUSTOMER"}, mode = SaMode.OR)
     public Result<IPage<Product>> page(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
@@ -34,7 +34,7 @@ public class ProductController {
 
     /** 根据 ID 查询商品详情 */
     @GetMapping("/{id}")
-    @SaCheckRole(value = {"ADMIN", "SUPPLIER"}, mode = SaMode.OR)
+    @SaCheckRole(value = {"ADMIN", "SUPPLIER", "CUSTOMER"}, mode = SaMode.OR)
     public Result<Product> getById(@PathVariable Long id) {
         return Result.ok(productService.getById(id));
     }

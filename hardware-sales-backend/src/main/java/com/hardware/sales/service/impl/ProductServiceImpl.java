@@ -29,9 +29,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product>
     @Override
     public IPage<Product> pageQuery(Integer pageNum, Integer pageSize,
                                     String name, String brand, Long categoryId) {
+        String normalizedName = normalizeQueryKeyword(name);
+        String normalizedBrand = normalizeQueryKeyword(brand);
         return lambdaQuery()
-                .like(StrUtil.isNotBlank(name), Product::getName, name)
-                .like(StrUtil.isNotBlank(brand), Product::getBrand, brand)
+                .like(StrUtil.isNotBlank(normalizedName), Product::getName, normalizedName)
+                .like(StrUtil.isNotBlank(normalizedBrand), Product::getBrand, normalizedBrand)
                 .eq(categoryId != null, Product::getCategoryId, categoryId)
                 .orderByDesc(Product::getCreateTime)
                 .page(new Page<>(pageNum, pageSize));
@@ -127,6 +129,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product>
         if (restockThreshold != null && restockThreshold < 0) {
             throw new BizException("补货阈值不能小于0");
         }
+    }
+
+    /** 统一兜底小程序等客户端误传的空关键字，避免拼出 like '%undefined%'。 */
+    private String normalizeQueryKeyword(String keyword) {
+        if (StrUtil.isBlank(keyword)) {
+            return null;
+        }
+        String trimmedKeyword = keyword.trim();
+        if ("undefined".equalsIgnoreCase(trimmedKeyword) || "null".equalsIgnoreCase(trimmedKeyword)) {
+            return null;
+        }
+        return trimmedKeyword;
     }
 
     private Product requireProduct(Long productId) {

@@ -1,0 +1,82 @@
+<view class="container product-list-container {{hasCart ? 'with-cart' : ''}}">
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+        <view class="search-inner flex-row">
+            <text class="search-icon">🔍</text>
+            <input
+                class="search-input"
+                placeholder="搜索商品名称"
+                value="{{searchName}}"
+                bindinput="onSearchInput"
+                bindconfirm="onSearch"
+                confirm-type="search"
+            />
+            <view class="search-btn" bindtap="onSearch">搜索</view>
+        </view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="product-list">
+        <view
+            class="product-card"
+            wx:for="{{products}}"
+            wx:key="id"
+            bindtap="goDetail"
+            data-id="{{item.id}}"
+        >
+            <view class="product-info flex-1">
+                <view class="product-name">{{item.name}}</view>
+                <view class="product-brand-spec flex-row">
+                    <text class="tag tag-brand" wx:if="{{item.brand}}">{{item.brand}}</text>
+                    <text class="tag tag-spec" wx:if="{{item.spec}}">{{item.spec}}</text>
+                </view>
+                <view class="product-desc text-sm" wx:if="{{item.description}}">{{item.description}}</view>
+                <view class="product-bottom flex-row justify-between">
+                    <view class="price-row flex-row">
+                        <text class="price">¥{{item.salePrice}}</text>
+                        <text class="unit">/{{item.unit}}</text>
+                    </view>
+                    <view class="stock-badge {{item.stock <= item.restockThreshold ? 'stock-low' : 'stock-ok'}}">
+                        库存 {{item.stock}} {{item.unit}}
+                    </view>
+                </view>
+            </view>
+            <view class="cart-action" catchtap="stopPropagation">
+                <view class="cart-stepper flex-row" wx:if="{{item.cartQuantity > 0}}">
+                    <view class="cart-step-btn" catchtap="decreaseCartQty" data-product="{{item}}">−</view>
+                    <text class="cart-step-count">{{item.cartQuantity}}</text>
+                    <view class="cart-step-btn" catchtap="increaseCartQty" data-product="{{item}}" data-quantity="{{item.cartQuantity}}">＋</view>
+                </view>
+                <view class="add-cart-btn" wx:else catchtap="addToCart" data-product="{{item}}">加入清单</view>
+            </view>
+        </view>
+
+        <view class="empty-state" wx:if="{{!loading && products.length === 0}}">
+            <text class="empty-icon">📦</text>
+            <text class="empty-text">暂无商品</text>
+        </view>
+        <view class="load-more" wx:if="{{loading}}">加载中...</view>
+        <view class="load-more" wx:if="{{!loading && finished && products.length > 0}}">— 已加载全部 {{total}} 件商品 —</view>
+    </view>
+
+    <view class="cart-submit-panel" wx:if="{{cartTotalCount > 0}}">
+        <view class="cart-summary-row flex-row justify-between">
+            <view>
+                <view class="cart-summary-title">已选 {{cartTypeCount}} 种，共 {{cartTotalCount}} 件</view>
+                <view class="cart-summary-amount">合计 ¥{{cartTotalAmount}}</view>
+            </view>
+            <view class="cart-clear-link" bindtap="clearCart">清空清单</view>
+        </view>
+        <view class="cart-preview text-sm">{{cartPreviewText}}</view>
+        <input
+            class="cart-remark-input"
+            placeholder="整单备注（选填，如到店自提、需要发票）"
+            value="{{cartRemark}}"
+            bindinput="onCartRemarkInput"
+        />
+        <view class="cart-submit-actions flex-row">
+            <view class="cart-submit-tip">确认后会一次生成一张销售单</view>
+            <button class="btn-primary cart-submit-btn" bindtap="submitCartOrder" loading="{{submittingCart}}">提交预定</button>
+        </view>
+    </view>
+</view>

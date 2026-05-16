@@ -1,6 +1,48 @@
 const auth = require('./auth.js')
 const BASE_URL = 'http://127.0.0.1:8080'
 // const BASE_URL = 'http://192.168.0.103:8080'
+
+/**
+ * 统一清洗请求参数，避免 GET 查询串把空值序列化为无效筛选条件。
+ */
+function sanitizeRequestData(data, removeEmptyString = false) {
+    if (data === undefined || data === null) {
+        return undefined
+    }
+    if (Array.isArray(data)) {
+        return data.map((item) => sanitizeRequestData(item, removeEmptyString))
+    }
+    if (typeof data !== 'object') {
+        if (typeof data === 'string') {
+            const trimmedValue = data.trim()
+            if (trimmedValue === 'undefined' || trimmedValue === 'null') {
+                return undefined
+            }
+            if (removeEmptyString && trimmedValue === '') {
+                return undefined
+            }
+        }
+        return data
+    }
+
+    const sanitizedData = {}
+    Object.keys(data).forEach((key) => {
+        const value = sanitizeRequestData(data[key], removeEmptyString)
+        if (value !== undefined) {
+            sanitizedData[key] = value
+        }
+    })
+    return sanitizedData
+}
+
+/**
+ * 根据请求方法构造最终请求体，GET 请求额外移除空字符串筛选值。
+ */
+function buildRequestData(options) {
+    const method = (options.method || 'GET').toUpperCase()
+    return sanitizeRequestData(options.data, method === 'GET')
+}
+
 /**
  * 统一网络请求封装
  */
@@ -19,7 +61,7 @@ function request(options) {
         wx.request({
             url: BASE_URL + options.url,
             method: options.method || 'GET',
-            data: options.data,
+            data: buildRequestData(options),
             header: header,
             timeout: 10000,
             success: (res) => {

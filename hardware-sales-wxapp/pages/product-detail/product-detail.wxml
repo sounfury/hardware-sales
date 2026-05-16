@@ -1,0 +1,49 @@
+<view class="container detail-container" wx:if="{{!loading && product}}">
+    <view class="product-header">
+        <view class="product-name-lg">{{product.name}}</view>
+        <view class="tag-row flex-row">
+            <text class="tag tag-brand" wx:if="{{product.brand}}">{{product.brand}}</text>
+            <text class="tag tag-spec" wx:if="{{product.spec}}">{{product.spec}}</text>
+        </view>
+    </view>
+    <view class="card price-card flex-row justify-between">
+        <view>
+            <view class="price-label">销售价格</view>
+            <view class="price-value">¥<text class="price-num">{{product.salePrice}}</text> / {{product.unit}}</view>
+        </view>
+        <view class="stock-info">
+            <view class="stock-label">库存数量</view>
+            <view class="stock-value {{product.stock <= product.restockThreshold ? 'text-warning' : 'text-success'}}">{{product.stock}} {{product.unit}}</view>
+        </view>
+    </view>
+    <view class="card" wx:if="{{product.description}}">
+        <view class="section-title">商品描述</view>
+        <view class="desc-text">{{product.description}}</view>
+    </view>
+    <view class="card">
+        <view class="section-title">选择数量</view>
+        <view class="qty-row flex-row justify-between">
+            <view class="stepper flex-row">
+                <view class="stepper-btn" bindtap="decreaseQty">−</view>
+                <input class="stepper-input" type="number" value="{{quantity}}" bindinput="onQtyInput" />
+                <view class="stepper-btn" bindtap="increaseQty">＋</view>
+            </view>
+            <view class="total-amount">合计：<text class="total-price">¥{{totalAmount}}</text></view>
+        </view>
+    </view>
+    <view class="card">
+        <view class="section-title">整单备注（选填）</view>
+        <input class="remark-input" placeholder="如：到店自提、需要发票等" value="{{cartRemark}}" bindinput="onCartRemarkInput" />
+        <view class="remark-tip text-sm">该备注会跟随本次购物车整单一起提交。</view>
+    </view>
+    <view class="bottom-placeholder"></view>
+    <view class="bottom-bar">
+        <view class="bottom-total">
+            <text class="bottom-total-label">当前加入 {{quantity}} 件，购物车共 {{cartTotalCount}} 件</text>
+            <text class="bottom-total-price">¥{{totalAmount}}</text>
+        </view>
+        <button class="detail-back-btn" bindtap="goBackToProductList">返回列表</button>
+        <button class="btn-primary order-confirm-btn" bindtap="addCurrentProductToCart">加入清单</button>
+    </view>
+</view>
+<view class="loading-state" wx:if="{{loading}}"><text>加载中...</text></view>

@@ -5,6 +5,16 @@ export function getUserPage(params) {
   return request.get('/system/user/page', { params })
 }
 
+/** 分页查询客户用户，供销售单创建页下拉选择客户。 */
+export function getCustomerUserPage(params = {}) {
+  return request.get('/system/user/page', {
+    params: {
+      ...params,
+      role: 'CUSTOMER',
+    },
+  })
+}
+
 /** 查询用户详情 */
 export function getUserDetail(id) {
   return request.get(`/system/user/${id}`)

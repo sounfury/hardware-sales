@@ -12,7 +12,7 @@ CREATE TABLE sys_user (
     nickname    VARCHAR(50)     COMMENT '昵称',
     avatar      VARCHAR(255)    COMMENT '头像',
     phone       VARCHAR(20)     COMMENT '手机号',
-    role        VARCHAR(20)     NOT NULL COMMENT '角色：ADMIN-系统管理员 BUSINESS-业务管理员 SUPPLIER-供应商 空字符串-待申请用户',
+    role        VARCHAR(20)     NOT NULL COMMENT '角色：ADMIN-业务管理员 SUPPLIER-供应商 CUSTOMER-客户 空字符串-待申请用户',
     status      TINYINT         NOT NULL DEFAULT 1 COMMENT '0-禁用 1-正常',
     create_time DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -20,8 +20,8 @@ CREATE TABLE sys_user (
     UNIQUE KEY uk_openid (openid)
 ) COMMENT '用户表';
 
--- 默认管理员（密码: admin123）
-INSERT INTO sys_user (username, password, role) VALUES ('admin', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', 'ADMIN');
+-- 默认业务管理员（密码: admin123）
+INSERT INTO sys_user (username, password, nickname, role) VALUES ('admin', '$2a$10$kz.6hN31xf22XCCLuA3EM.sNM1wIZA2h1/SpD6L18Sh10TlIpsbHq', '业务管理员', 'ADMIN');
 
 -- ----------------------------
 -- 供应商信息表
@@ -130,15 +130,19 @@ CREATE TABLE purchase_item (
 CREATE TABLE sales_order (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_no        VARCHAR(30)     NOT NULL COMMENT '销售单号',
+    customer_user_id BIGINT         COMMENT '关联客户用户ID',
     customer_name   VARCHAR(50)     COMMENT '客户名称',
     customer_phone  VARCHAR(20)     COMMENT '客户电话',
+    order_source    VARCHAR(20)     NOT NULL DEFAULT 'MANUAL' COMMENT '订单来源：MANUAL-后台创建 MINIAPP-小程序预定',
     total_amount    DECIMAL(12,2)   NOT NULL DEFAULT 0 COMMENT '总金额',
     payment_status  TINYINT         NOT NULL DEFAULT 0 COMMENT '0-未结算 1-已结算',
     order_date      DATE            NOT NULL COMMENT '销售日期',
     remark          VARCHAR(255)    COMMENT '备注',
     create_time     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_order_no (order_no)
+    UNIQUE KEY uk_order_no (order_no),
+    INDEX idx_customer_user_id (customer_user_id),
+    CONSTRAINT fk_sales_order_customer_user FOREIGN KEY (customer_user_id) REFERENCES sys_user (id)
 ) COMMENT '销售出货单';
 
 -- ----------------------------

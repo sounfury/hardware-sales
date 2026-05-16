@@ -15,8 +15,10 @@ import java.util.List;
 public class SalesOrder extends BaseEntity {
 
     private String orderNo;
+    private Long customerUserId;
     private String customerName;
     private String customerPhone;
+    private String orderSource;
     private BigDecimal totalAmount;
     private Integer paymentStatus;
     private LocalDate orderDate;

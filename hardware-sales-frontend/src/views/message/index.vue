@@ -10,6 +10,7 @@ import {
 import { getSupplierPage } from '@/api/supplier'
 import { useUserStore } from '@/stores/user'
 import { formatDateTime } from '@/utils/format'
+import { getDisplayName } from '@/utils/userDisplay'
 
 const userStore = useUserStore()
 
@@ -35,6 +36,7 @@ const receiverLabelMap = computed(() =>
 )
 
 const currentUserId = computed(() => userStore.userInfo?.id || null)
+const currentDisplayName = computed(() => getDisplayName(userStore.userInfo, '当前用户'))
 
 const dialogVisible = ref(false)
 const formRef = ref(null)
@@ -147,7 +149,7 @@ function getMessageTypeMeta(type) {
 
 function getReceiverLabel(row) {
   if (row.receiverId === currentUserId.value) {
-    return userStore.userInfo?.nickname || userStore.userInfo?.username || '当前用户'
+    return currentDisplayName.value
   }
   return receiverLabelMap.value[row.receiverId] || `用户#${row.receiverId}`
 }
@@ -184,7 +186,7 @@ onBeforeUnmount(() => {
       <el-card shadow="never" class="!border-gray-200/80">
         <p class="text-sm text-gray-400">当前收件箱</p>
         <p class="mt-2 text-xl font-semibold text-gray-800">
-          {{ userStore.userInfo?.nickname || userStore.userInfo?.username || '未登录' }}
+          {{ getDisplayName(userStore.userInfo, '未登录') }}
         </p>
       </el-card>
       <el-card shadow="never" class="!border-gray-200/80">

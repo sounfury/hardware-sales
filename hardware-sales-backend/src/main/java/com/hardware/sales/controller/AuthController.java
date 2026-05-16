@@ -25,33 +25,35 @@ public class AuthController {
     private final SysUserService sysUserService;
 
     /**
-     * 后台管理员登录，后端强制只允许 ADMIN 角色进入。
+     * 后台业务管理员登录，后端强制只允许 ADMIN 角色进入。
      */
     @PostMapping("/login")
     public Result<?> login(@RequestBody AuthLoginRequest loginRequest) {
         SysUser user = authenticate(loginRequest);
         if (!"ADMIN".equals(user.getRole())) {
-            throw new BizException("当前后台仅允许管理员登录");
+            throw new BizException("当前后台仅允许业务管理员登录");
         }
         StpUtil.login(user.getId());
         return Result.ok(buildLoginResult(user));
     }
 
     /**
-     * 小程序登录，允许已审核供应商和待申请用户进入小程序。
+     * 小程序登录，允许供应商、客户和待申请供应商用户进入小程序。
      */
     @PostMapping("/miniapp/login")
     public Result<?> miniappLogin(@RequestBody AuthLoginRequest loginRequest) {
         SysUser user = authenticate(loginRequest);
-        if (StrUtil.isNotBlank(user.getRole()) && !"SUPPLIER".equals(user.getRole())) {
-            throw new BizException("当前账号不可进入供应商小程序");
+        if (StrUtil.isNotBlank(user.getRole())
+                && !"SUPPLIER".equals(user.getRole())
+                && !"CUSTOMER".equals(user.getRole())) {
+            throw new BizException("当前账号不可进入小程序");
         }
         StpUtil.login(user.getId());
         return Result.ok(buildLoginResult(user));
     }
 
     /**
-     * 小程序注册，创建空角色账号并直接建立登录态。
+     * 小程序注册，根据注册类型创建客户或待申请供应商账号并直接建立登录态。
      */
     @PostMapping("/miniapp/register")
     public Result<?> miniappRegister(@RequestBody MiniappRegisterRequest registerRequest) {
@@ -62,7 +64,7 @@ public class AuthController {
         user.setPassword(registerRequest.getPassword());
         user.setNickname(StrUtil.blankToDefault(StrUtil.trim(registerRequest.getNickname()), user.getUsername()));
         user.setPhone(StrUtil.trim(registerRequest.getPhone()));
-        user.setRole("");
+        user.setRole(resolveRegisterRole(registerRequest.getRegisterType()));
         user.setStatus(1);
         sysUserService.createUser(user);
 
@@ -132,8 +134,13 @@ public class AuthController {
     private void validateRegisterRequest(MiniappRegisterRequest registerRequest) {
         if (registerRequest == null
                 || StrUtil.isBlank(registerRequest.getUsername())
-                || StrUtil.isBlank(registerRequest.getPassword())) {
-            throw new BizException("用户名和密码不能为空");
+                || StrUtil.isBlank(registerRequest.getPassword())
+                || StrUtil.isBlank(registerRequest.getRegisterType())) {
+            throw new BizException("注册类型、用户名和密码不能为空");
+        }
+        if (!"SUPPLIER".equals(registerRequest.getRegisterType())
+                && !"CUSTOMER".equals(registerRequest.getRegisterType())) {
+            throw new BizException("注册类型不合法");
         }
     }
 
@@ -145,5 +152,12 @@ public class AuthController {
                 "token", StpUtil.getTokenValue(),
                 "user", user
         );
+    }
+
+    /**
+     * 将注册类型转换为系统内的角色值。
+     */
+    private String resolveRegisterRole(String registerType) {
+        return "CUSTOMER".equals(registerType) ? "CUSTOMER" : "";
     }
 }

@@ -16,11 +16,14 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      // Element Plus 样式已在 main.js 中全量引入，这里关闭按需样式注入，
+      // 避免路由懒加载时再去动态拉取 *_style_css 模块导致白屏。
+      resolvers: [ElementPlusResolver({ importStyle: false })],
       imports: ['vue', 'vue-router', 'pinia'],
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      // 仅保留组件自动注册，不重复注入按需样式。
+      resolvers: [ElementPlusResolver({ importStyle: false })],
     }),
   ],
   server: {

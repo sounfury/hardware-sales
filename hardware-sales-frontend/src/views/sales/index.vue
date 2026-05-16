@@ -7,7 +7,8 @@ import {
   settleSalesOrder,
 } from '@/api/sales'
 import { getProductPage } from '@/api/product'
-import { formatDate, formatDateTime, formatMoney } from '@/utils/format'
+import { getCustomerUserPage } from '@/api/system'
+import { formatDate, formatMoney } from '@/utils/format'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -16,6 +17,8 @@ const pageNum = ref(1)
 const pageSize = ref(10)
 
 const productOptions = ref([])
+const customerOptions = ref([])
+const customerLoading = ref(false)
 
 const searchForm = reactive({
   orderNo: '',
@@ -26,6 +29,7 @@ const searchForm = reactive({
 const createDialogVisible = ref(false)
 const createFormRef = ref(null)
 const createForm = reactive({
+  customerUserId: null,
   customerName: '',
   customerPhone: '',
   orderDate: '',
@@ -42,6 +46,17 @@ const detailDialogVisible = ref(false)
 const detailLoading = ref(false)
 const detailData = ref(null)
 
+const paymentStatusMap = {
+  0: { label: '未结算', type: 'warning' },
+  1: { label: '已结算', type: 'success' },
+}
+
+const orderSourceMap = {
+  MANUAL: { label: '后台创建', type: 'info' },
+  MINIAPP: { label: '小程序预定', type: 'success' },
+}
+
+/** 创建一条空销售明细，供新建销售单时动态追加。 */
 function createEmptyItem() {
   return {
     productId: null,
@@ -50,6 +65,7 @@ function createEmptyItem() {
   }
 }
 
+/** 实时汇总当前销售单明细金额。 */
 const createTotal = computed(() =>
   createForm.items.reduce((sum, item) => {
     const quantity = Number(item.quantity || 0)
@@ -58,15 +74,17 @@ const createTotal = computed(() =>
   }, 0),
 )
 
-const paymentStatusMap = {
-  0: { label: '未结算', type: 'warning' },
-  1: { label: '已结算', type: 'success' },
-}
-
+/** 返回销售单收款状态对应的展示文案和颜色。 */
 function getPaymentMeta(status) {
   return paymentStatusMap[status] || { label: '未知', type: 'info' }
 }
 
+/** 返回订单来源对应的展示文案和颜色。 */
+function getOrderSourceMeta(orderSource) {
+  return orderSourceMap[orderSource] || { label: orderSource || '未标记', type: 'info' }
+}
+
+/** 加载商品下拉数据，供销售单明细选择商品。 */
 async function loadProducts() {
   const res = await getProductPage({
     pageNum: 1,
@@ -75,6 +93,21 @@ async function loadProducts() {
   productOptions.value = res.data.records || []
 }
 
+/** 加载客户账号下拉数据，供后台创建销售单时快速选择客户。 */
+async function loadCustomers() {
+  customerLoading.value = true
+  try {
+    const res = await getCustomerUserPage({
+      pageNum: 1,
+      pageSize: 200,
+    })
+    customerOptions.value = res.data.records || []
+  } finally {
+    customerLoading.value = false
+  }
+}
+
+/** 加载销售单分页列表。 */
 async function loadList() {
   loading.value = true
   try {
@@ -93,11 +126,13 @@ async function loadList() {
   }
 }
 
+/** 按当前筛选条件重新查询销售单列表。 */
 function handleSearch() {
   pageNum.value = 1
   loadList()
 }
 
+/** 重置查询条件并重新加载销售单列表。 */
 function handleReset() {
   searchForm.orderNo = ''
   searchForm.customerName = ''
@@ -105,7 +140,9 @@ function handleReset() {
   handleSearch()
 }
 
+/** 重置新建销售单表单。 */
 function resetCreateForm() {
+  createForm.customerUserId = null
   createForm.customerName = ''
   createForm.customerPhone = ''
   createForm.orderDate = ''
@@ -113,21 +150,38 @@ function resetCreateForm() {
   createForm.items = [createEmptyItem()]
 }
 
+/** 打开新建销售单弹窗。 */
 function handleAdd() {
   resetCreateForm()
   createDialogVisible.value = true
   nextTick(() => createFormRef.value?.clearValidate())
 }
 
+/** 追加一条销售明细。 */
 function addItem() {
   createForm.items.push(createEmptyItem())
 }
 
+/** 删除一条销售明细，至少保留一条空明细。 */
 function removeItem(index) {
   if (createForm.items.length === 1) return
   createForm.items.splice(index, 1)
 }
 
+/**
+ * 选择客户账号后自动带出昵称和手机号快照。
+ * 这里仍保留手工修改能力，便于后台调整订单展示用的历史快照信息。
+ */
+function handleCustomerChange(customerUserId) {
+  const customer = customerOptions.value.find((item) => item.id === customerUserId)
+  if (!customer) {
+    return
+  }
+  createForm.customerName = customer.nickname || customer.username || ''
+  createForm.customerPhone = customer.phone || ''
+}
+
+/** 选择商品后优先填充当前商品售价，减少手工录入。 */
 function handleProductChange(item) {
   const product = productOptions.value.find((option) => option.id === item.productId)
   if (product && (item.price == null || item.price === '')) {
@@ -135,10 +189,12 @@ function handleProductChange(item) {
   }
 }
 
+/** 计算单条销售明细的小计金额。 */
 function getLineAmount(item) {
   return Number(item.quantity || 0) * Number(item.price || 0)
 }
 
+/** 提交新建销售单表单。 */
 async function handleCreateSubmit() {
   await createFormRef.value.validate()
   const invalidItem = createForm.items.find(
@@ -149,6 +205,7 @@ async function handleCreateSubmit() {
     return
   }
   await createSalesOrder({
+    customerUserId: createForm.customerUserId || undefined,
     customerName: createForm.customerName,
     customerPhone: createForm.customerPhone,
     orderDate: createForm.orderDate,
@@ -164,6 +221,7 @@ async function handleCreateSubmit() {
   loadList()
 }
 
+/** 查询销售单详情并打开详情弹窗。 */
 async function handleViewDetail(id) {
   detailLoading.value = true
   detailDialogVisible.value = true
@@ -175,6 +233,7 @@ async function handleViewDetail(id) {
   }
 }
 
+/** 结算指定销售单，并在当前页同步刷新状态。 */
 async function handleSettle(row) {
   await ElMessageBox.confirm(`确认结算销售单 ${row.orderNo}？`, '结算确认', { type: 'warning' })
   await settleSalesOrder(row.id)
@@ -186,7 +245,7 @@ async function handleSettle(row) {
 }
 
 onMounted(async () => {
-  await loadProducts()
+  await Promise.all([loadProducts(), loadCustomers()])
   loadList()
 })
 </script>
@@ -239,6 +298,13 @@ onMounted(async () => {
         <el-table-column prop="orderNo" label="销售单号" min-width="200" />
         <el-table-column prop="customerName" label="客户名称" min-width="160" />
         <el-table-column prop="customerPhone" label="联系电话" width="140" />
+        <el-table-column label="订单来源" width="120" align="center">
+          <template #default="{ row }">
+            <el-tag :type="getOrderSourceMeta(row.orderSource).type" effect="plain">
+              {{ getOrderSourceMeta(row.orderSource).label }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="总金额" width="120" align="right">
           <template #default="{ row }">{{ formatMoney(row.totalAmount) }}</template>
         </el-table-column>
@@ -291,7 +357,25 @@ onMounted(async () => {
       :close-on-click-modal="false"
     >
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="88px" class="pr-4">
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-4">
+          <el-form-item label="客户账号">
+            <el-select
+              v-model="createForm.customerUserId"
+              placeholder="可选，选择已注册客户"
+              clearable
+              filterable
+              :loading="customerLoading"
+              class="!w-full"
+              @change="handleCustomerChange"
+            >
+              <el-option
+                v-for="customer in customerOptions"
+                :key="customer.id"
+                :label="`${customer.nickname || customer.username}（${customer.phone || '无手机号'}）`"
+                :value="customer.id"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="客户名称" prop="customerName">
             <el-input v-model="createForm.customerName" placeholder="请输入客户名称" />
           </el-form-item>
@@ -323,7 +407,11 @@ onMounted(async () => {
             </el-button>
           </div>
 
-          <div v-for="(item, index) in createForm.items" :key="index" class="mb-3 rounded-lg bg-white p-3 shadow-sm last:mb-0">
+          <div
+            v-for="(item, index) in createForm.items"
+            :key="index"
+            class="mb-3 rounded-lg bg-white p-3 shadow-sm last:mb-0"
+          >
             <div class="grid gap-3 md:grid-cols-[2fr_1fr_1fr_auto]">
               <el-select
                 v-model="item.productId"
@@ -376,6 +464,12 @@ onMounted(async () => {
               <p class="mt-1 font-medium text-gray-800">{{ detailData.orderNo }}</p>
             </div>
             <div>
+              <p class="text-xs text-gray-400">订单来源</p>
+              <el-tag class="mt-1" :type="getOrderSourceMeta(detailData.orderSource).type" effect="plain">
+                {{ getOrderSourceMeta(detailData.orderSource).label }}
+              </el-tag>
+            </div>
+            <div>
               <p class="text-xs text-gray-400">客户名称</p>
               <p class="mt-1 font-medium text-gray-800">{{ detailData.customerName }}</p>
             </div>
@@ -404,7 +498,7 @@ onMounted(async () => {
 
           <div class="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3">
             <div class="text-sm text-gray-500">
-              联系电话：{{ detailData.customerPhone || '未填写' }} ｜ 备注：{{ detailData.remark || '无' }}
+              客户ID：{{ detailData.customerUserId || '手工客户' }} ｜ 联系电话：{{ detailData.customerPhone || '未填写' }} ｜ 备注：{{ detailData.remark || '无' }}
             </div>
             <div class="text-right">
               <p class="text-xs text-gray-400">销售总金额</p>

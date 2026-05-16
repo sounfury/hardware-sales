@@ -2,12 +2,14 @@
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessageBox } from 'element-plus'
+import { getDisplayName } from '@/utils/userDisplay'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
 const isCollapse = ref(false)
+const currentDisplayName = computed(() => getDisplayName(userStore.userInfo, '业务管理员'))
 
 /** 菜单配置 */
 const menus = [
@@ -159,7 +161,7 @@ onMounted(() => {
               <el-icon :size="14" class="text-primary"><UserFilled /></el-icon>
             </div>
             <span class="text-sm font-medium text-slate-700">
-              {{ userStore.userInfo?.nickname || userStore.userInfo?.username || '管理员' }}
+              {{ currentDisplayName }}
             </span>
           </div>
           

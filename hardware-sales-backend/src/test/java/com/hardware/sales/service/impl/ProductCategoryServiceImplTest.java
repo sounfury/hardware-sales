@@ -1,6 +1,7 @@
 package com.hardware.sales.service.impl;
 
 import com.hardware.sales.common.exception.BizException;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.hardware.sales.entity.Product;
 import com.hardware.sales.entity.ProductCategory;
 import com.hardware.sales.service.ProductCategoryService;
@@ -111,6 +112,20 @@ class ProductCategoryServiceImplTest {
 
         assertDoesNotThrow(() -> productService.updateProduct(updatingProduct));
         assertEquals("编辑后商品", productService.getById(product.getId()).getName());
+    }
+
+    /**
+     * 商品分页查询应忽略客户端误传的 undefined 关键字，避免首屏查询被错误过滤。
+     */
+    @Test
+    void shouldIgnoreLiteralUndefinedKeywordWhenPagingProducts() {
+        ProductCategory category = createCategory("分页兜底分类", 1);
+        createProduct(category.getId(), "分页兜底商品");
+
+        IPage<Product> normalPage = productService.pageQuery(1, 100, null, null, null);
+        IPage<Product> undefinedKeywordPage = productService.pageQuery(1, 100, "undefined", null, null);
+
+        assertEquals(normalPage.getTotal(), undefinedKeywordPage.getTotal());
     }
 
     private ProductCategory createCategory(String name, Integer status) {

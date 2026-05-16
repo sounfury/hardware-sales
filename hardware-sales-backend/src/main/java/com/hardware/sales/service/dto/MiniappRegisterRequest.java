@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class MiniappRegisterRequest {
 
+    /** 注册类型：SUPPLIER-供应商 CUSTOMER-客户。 */
+    private String registerType;
+
     /** 登录用户名。 */
     private String username;
 

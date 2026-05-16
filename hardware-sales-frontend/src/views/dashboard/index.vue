@@ -10,6 +10,7 @@ import { getSupplierProductByProduct } from '@/api/supplierProduct'
 import { useUserStore } from '@/stores/user'
 import { buildPurchasePrefillQuery, getCurrentLocalDate } from '@/utils/purchasePrefill'
 import { formatDate, formatMoney } from '@/utils/format'
+import { getDisplayName } from '@/utils/userDisplay'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -32,6 +33,7 @@ const quoteLoading = ref(false)
 const quoteList = ref([])
 const currentProduct = ref(null)
 const restockContent = ref('当前商品库存偏低，请尽快安排补货。')
+const currentDisplayName = computed(() => getDisplayName(userStore.userInfo, '管理员'))
 
 const shortcuts = [
   { title: '新建采购单', path: '/trade/purchase', icon: 'ShoppingTrolley', desc: '录入进货' },
@@ -212,7 +214,7 @@ onMounted(() => loadData())
         <div>
           <p class="text-slate-400 font-medium mb-1">Welcome back,</p>
           <h2 class="text-4xl font-bold tracking-tight">
-            {{ userStore.userInfo?.nickname || userStore.userInfo?.username || '管理员' }}
+            {{ currentDisplayName }}
           </h2>
           <p class="mt-3 text-slate-300 max-w-md leading-relaxed">
             您有 <span class="text-white font-bold">{{ unreadCount }}</span> 条消息及 

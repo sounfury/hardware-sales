@@ -24,9 +24,9 @@ const searchForm = reactive({
 })
 
 const roleOptions = [
-  { label: '系统管理员', value: 'ADMIN' },
-  { label: '业务管理员', value: 'BUSINESS' },
+  { label: '业务管理员', value: 'ADMIN' },
   { label: '供应商', value: 'SUPPLIER' },
+  { label: '客户', value: 'CUSTOMER' },
 ]
 
 const statusOptions = [
@@ -51,7 +51,7 @@ const formData = reactive({
   password: '',
   nickname: '',
   phone: '',
-  role: 'BUSINESS',
+  role: 'ADMIN',
   status: 1,
 })
 
@@ -96,7 +96,7 @@ function resetForm() {
   formData.password = ''
   formData.nickname = ''
   formData.phone = ''
-  formData.role = 'BUSINESS'
+  formData.role = 'ADMIN'
   formData.status = 1
 }
 
@@ -174,7 +174,7 @@ onMounted(() => loadList())
     <div class="flex items-center justify-between gap-4">
       <div>
         <h2 class="text-lg font-semibold text-gray-800">用户管理</h2>
-        <p class="mt-0.5 text-sm text-gray-400">维护管理员、业务人员和供应商登录账号</p>
+        <p class="mt-0.5 text-sm text-gray-400">维护业务管理员、供应商和客户登录账号</p>
       </div>
       <el-button type="primary" @click="handleAdd">
         <el-icon class="mr-1"><Plus /></el-icon>新增用户
