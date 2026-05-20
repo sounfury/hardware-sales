@@ -41,6 +41,13 @@ public class SupplierProductServiceImpl extends ServiceImpl<SupplierProductMappe
         return baseMapper.selectJoinPage(new Page<>(pageNum, pageSize), SupplierProduct.class, wrapper);
     }
 
+    /** 按 ID 联表查询报价详情，补充商品名称、规格、单位等展示字段。 */
+    @Override
+    public SupplierProduct getDetailById(Long id) {
+        return baseMapper.selectJoinOne(SupplierProduct.class, buildJoinWrapper()
+                .eq(SupplierProduct::getId, id));
+    }
+
     /** 查询指定供应商维护的全部供货商品。 */
     @Override
     public List<SupplierProduct> listBySupplierId(Long supplierId) {

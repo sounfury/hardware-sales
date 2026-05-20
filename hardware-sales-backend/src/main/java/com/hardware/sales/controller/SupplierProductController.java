@@ -123,7 +123,7 @@ public class SupplierProductController {
         if (id == null) {
             throw new BizException("供应商商品ID不能为空");
         }
-        SupplierProduct supplierProduct = supplierProductService.getById(id);
+        SupplierProduct supplierProduct = supplierProductService.getDetailById(id);
         if (supplierProduct == null) {
             throw new BizException("供应商商品不存在");
         }

@@ -18,6 +18,9 @@ public interface SupplierProductService extends IService<SupplierProduct> {
     /** 查询指定供应商的全部供货商品 */
     List<SupplierProduct> listBySupplierId(Long supplierId);
 
+    /** 按 ID 联表查询报价详情（含商品名、规格、单位等展示字段） */
+    SupplierProduct getDetailById(Long id);
+
     /** 查询指定商品的全部可供货供应商 */
     List<SupplierProduct> listByProductId(Long productId);
 

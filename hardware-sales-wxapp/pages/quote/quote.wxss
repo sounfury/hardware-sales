@@ -99,7 +99,7 @@
 .fab-btn {
     position: fixed;
     right: 40rpx;
-    bottom: 60rpx;
+    bottom: 200rpx; /* 自定义 tabBar 高度约 160rpx，留出余量 */
     width: 100rpx;
     height: 100rpx;
     background: var(--primary-color);
