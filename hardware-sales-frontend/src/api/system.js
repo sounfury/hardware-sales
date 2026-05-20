@@ -48,14 +48,3 @@ export function downloadDbBackup() {
     responseType: 'blob',
   })
 }
-
-/** 上传数据库备份文件还原 */
-export function restoreDbBackup(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  return request.post('/system/db/restore', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-}
